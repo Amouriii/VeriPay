@@ -1,0 +1,16 @@
+{
+  "request": { "method": "GET", "urlPattern": "/api/v1/transactions/.*/risk" },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "transaction_id": "tx_mock_001",
+      "unified_score": 42,
+      "band": "VERIFY",
+      "components": [
+        { "component": "supervised", "score": 35, "weight": 0.3, "available": true, "reason_code": "NEW_DEVICE" },
+        { "component": "anomaly", "score": 50, "weight": 0.15, "available": true }
+      ]
+    }
+  }
+}

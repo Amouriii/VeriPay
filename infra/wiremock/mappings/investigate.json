@@ -1,0 +1,12 @@
+{
+  "request": { "method": "POST", "urlPattern": "/api/v1/investigate/.*" },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": {
+      "transaction_id": "tx_mock_001",
+      "analyst_summary": "Transaction flagged for elevated risk. Primary driver: NEW_DEVICE with z-score 2.8 on amount. Recommend analyst review before approval.",
+      "guardrail_violation": false
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "request": { "method": "GET", "url": "/api/v1/transactions" },
+  "response": {
+    "status": 200,
+    "headers": { "Content-Type": "application/json" },
+    "jsonBody": [
+      {
+        "transaction_id": "tx_mock_001",
+        "user_id": "u_100",
+        "amount_minor": 4999,
+        "currency": "USD",
+        "merchant_id": "m_amazon",
+        "mti": "0100",
+        "channel": "CARD_NOT_PRESENT"
+      }
+    ]
+  }
+}
