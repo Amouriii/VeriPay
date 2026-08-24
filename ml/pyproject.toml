@@ -3,7 +3,10 @@ name = "veripay-ml"
 version = "0.1.0"
 description = "ML training pipelines for supervised, anomaly, graph, and fusion models (PLAN §10, §11, §12, §18)."
 requires-python = ">=3.11"
-dependencies = [
+dependencies = []
+
+[project.optional-dependencies]
+training = [
     "xgboost>=2.1",
     "scikit-learn>=1.5",
     "shap>=0.46",

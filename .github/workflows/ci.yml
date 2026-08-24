@@ -29,14 +29,8 @@ jobs:
       - name: buf lint
         run: buf lint
       - name: buf breaking (against main)
-        # Non-fatal during initial bootstrap: the first merge establishes the
-        # baseline. After main has the compliant protos, remove `|| true` to
-        # enforce breaking-change detection on every PR.
         if: github.ref != 'refs/heads/main'
-        run: buf breaking --against "https://github.com/${{ github.repository }}.git#branch=main,subdir=proto" || true
-      - name: buf breaking (self, on main)
-        if: github.ref == 'refs/heads/main'
-        run: buf breaking --against ".git#branch=main~1,subdir=proto" || true
+        run: buf breaking --against "https://github.com/${{ github.repository }}.git#branch=main,subdir=proto"
 
   # ---------------------------------------------------------------- lint -----
   lint:
@@ -52,7 +46,7 @@ jobs:
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: web/package.json
+          cache-dependency-path: web/package-lock.json
       - name: Install Python tooling
         run: |
           python -m pip install --upgrade pip
@@ -66,7 +60,7 @@ jobs:
       - name: ruff format --check
         run: ruff format --check .
       - name: mypy
-        run: mypy libs services || true  # stubs are intentionally untyped
+        run: mypy libs services
       - name: eslint
         run: npm run lint
         working-directory: web
@@ -86,7 +80,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest pytest-asyncio httpx
           pip install -e libs/veripay_common
-          # Install each editable service so its `app` package resolves.
+          pip install -e ml --no-deps
+          # Install each editable service so its package resolves.
           for s in services/*; do
             [ -f "$s/pyproject.toml" ] && pip install -e "$s" || true
           done
@@ -102,7 +97,7 @@ jobs:
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: web/package.json
+          cache-dependency-path: web/package-lock.json
       - name: Install web deps
         run: npm ci || npm install
         working-directory: web
