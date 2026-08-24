@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MerchantProfile",
+  "type": "object",
+  "required": ["merchant_id", "business_name", "category", "active"],
+  "properties": {
+    "merchant_id": { "type": "string" },
+    "business_name": { "type": "string" },
+    "category": { "enum": ["ECOMMERCE", "B2B_CORPORATE", "RETAIL", "DIGITAL_GOODS"] },
+    "mcc": { "type": ["string", "null"] },
+    "webhook_url": { "type": ["string", "null"] },
+    "active": { "type": "boolean" }
+  }
+}

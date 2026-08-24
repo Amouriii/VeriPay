@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DisputeCase",
+  "type": "object",
+  "required": ["dispute_id", "transaction_id", "amount_minor", "currency", "status", "reason"],
+  "properties": {
+    "dispute_id": { "type": "string" },
+    "transaction_id": { "type": "string" },
+    "merchant_id": { "type": ["string", "null"] },
+    "issuer_account_id": { "type": ["string", "null"] },
+    "amount_minor": { "type": "integer", "minimum": 0 },
+    "currency": { "type": "string" },
+    "status": { "enum": ["OPENED", "REPRESENTED", "ACCEPTED", "REVERSED", "EXPIRED"] },
+    "reason": { "enum": ["FRAUD", "AUTHORIZATION", "PROCESSING_ERROR", "CONSUMER", "MERCHANT"] },
+    "evidence_ref": { "type": ["string", "null"] },
+    "opened_at_unix_ms": { "type": "integer" },
+    "resolved_at_unix_ms": { "type": ["integer", "null"] }
+  }
+}

@@ -1,0 +1,3 @@
+"""FI Ops Portal service package."""
+
+__version__ = "0.1.0"

@@ -51,3 +51,12 @@ land on `main` first. See `docs/contributing.md`.
 | investigation_agent | 8014 | §20 |
 | auth_orchestration | 8015 | §16 |
 | feedback_loop | 8016 | §21 |
+| **Expansion — Banking/FI + Business** | | |
+| banking_gateway | 8017 | Expansion §1 Dev1 |
+| merchant_ingress | 8018 | Expansion §1 Dev1 |
+| merchant_policy | 8019 | Expansion §1 Dev4 |
+| dispute_engine | 8020 | Expansion §1 Dev5 |
+| compliance_engine | 8021 | Expansion §1 Dev4 |
+| fi_ops_portal | 8022 | Expansion §1 Dev5 |
+| business_portal | 8023 | Expansion §1 Dev5 |
+| corporate_spend | 8024 | Expansion §1 Dev1 |

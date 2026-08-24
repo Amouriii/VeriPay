@@ -71,3 +71,60 @@ class DeviceTrustState(StrEnum):
     TRUSTED = "TRUSTED"
     UNTRUSTED = "UNTRUSTED"
     UNKNOWN = "UNKNOWN"
+
+
+class CardNetwork(StrEnum):
+    VISA = "VISA"
+    MASTERCARD = "MASTERCARD"
+    AMEX = "AMEX"
+    DISCOVER = "DISCOVER"
+
+
+class SettlementStatus(StrEnum):
+    PENDING = "PENDING"
+    SETTLED = "SETTLED"
+    REJECTED = "REJECTED"
+    REVERSED = "REVERSED"
+
+
+class MerchantCategory(StrEnum):
+    ECOMMERCE = "ECOMMERCE"
+    B2B_CORPORATE = "B2B_CORPORATE"
+    RETAIL = "RETAIL"
+    DIGITAL_GOODS = "DIGITAL_GOODS"
+
+
+class WebhookDecision(StrEnum):
+    ALLOW = "ALLOW"
+    BLOCK = "BLOCK"
+    VERIFY = "VERIFY"
+
+
+class DisputeStatus(StrEnum):
+    OPENED = "OPENED"
+    REPRESENTED = "REPRESENTED"
+    ACCEPTED = "ACCEPTED"
+    REVERSED = "REVERSED"
+    EXPIRED = "EXPIRED"
+
+
+class DisputeReason(StrEnum):
+    FRAUD = "FRAUD"
+    AUTHORIZATION = "AUTHORIZATION"
+    PROCESSING_ERROR = "PROCESSING_ERROR"
+    CONSUMER = "CONSUMER"
+    MERCHANT = "MERCHANT"
+
+
+class ComplianceStandard(StrEnum):
+    PCI_DSS_4_0 = "PCI_DSS_4_0"
+    PSD3_SCA = "PSD3_SCA"
+    NETWORK_ZERO_TRUST = "NETWORK_ZERO_TRUST"
+
+
+class ScaExemption(StrEnum):
+    LOW_VALUE = "LOW_VALUE"
+    TRUSTED_BENEFICIARY = "TRUSTED_BENEFICIARY"
+    RECURRING = "RECURRING"
+    CORPORATE = "CORPORATE"
+    NONE = "NONE"

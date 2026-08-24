@@ -27,6 +27,28 @@ each diagrammed box to its scaffold location and PLAN section.
 | Contracts (gRPC) | `proto/veripay/` | all |
 | Shared enums/constants | `libs/veripay_common`, `libs/veripay_ts` | all |
 
+## Expansion: Banking/FI + Business/Merchant
+
+| Component | Location | Expansion § |
+|---|---|---|
+| Banking Gateway (ISO 20022) | `services/banking_gateway` | §1 Dev1, §2 |
+| Merchant Ingress (VCN, webhooks) | `services/merchant_ingress` | §1 Dev1, §2 |
+| Corporate Spend Service | `services/corporate_spend` | §1 Dev1, §2 |
+| Settlement Sync | `streaming/jobs/settlement_sync.py` | §1 Dev2 |
+| Merchant Aggregations | `streaming/jobs/merchant_aggregations.py` | §1 Dev2 |
+| Issuer Risk Models | `ml/issuer_risk/` | §1 Dev3 |
+| Fraud Ring Engine | `ml/fraud_ring/` | §1 Dev3 |
+| Merchant Risk Models | `ml/merchant_risk/` | §1 Dev3 |
+| B2B Credit Risk | `ml/b2b_credit/` | §1 Dev3 |
+| Merchant Policy Engine | `services/merchant_policy` | §1 Dev4, §2 |
+| Compliance Engine (PCI/PSD3) | `services/compliance_engine` | §1 Dev4, §2 |
+| Dispute Engine | `services/dispute_engine` | §1 Dev5, §3 |
+| Dispute Sync (→ Iceberg) | `streaming/jobs/dispute_sync.py` | §1 Dev5, §3 |
+| FI Ops Portal | `services/fi_ops_portal` + `web/src/pages/FiOpsConsole.tsx` | §1 Dev5, §2 |
+| Business Portal | `services/business_portal` + `web/src/pages/BusinessTreasury.tsx` | §1 Dev5, §2 |
+
+See `docs/developer-ownership.md` for the full 5-developer work-tree map.
+
 ## Shared boundary (merge-coordination point)
 - `proto/` — wire contracts
 - `libs/` — read-only shared code mirroring proto

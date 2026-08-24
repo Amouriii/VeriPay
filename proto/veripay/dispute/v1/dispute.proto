@@ -1,0 +1,63 @@
+// Dispute / chargeback lifecycle contracts (PLAN Expansion §1 Dev5, §3).
+// Async dispute sync into Iceberg for retraining without blocking live processing.
+syntax = "proto3";
+
+package veripay.dispute.v1;
+
+enum DisputeStatus {
+  DISPUTE_STATUS_UNSPECIFIED = 0;
+  DISPUTE_STATUS_OPENED = 1;
+  DISPUTE_STATUS_REPRESENTED = 2;
+  DISPUTE_STATUS_ACCEPTED = 3;
+  DISPUTE_STATUS_REVERSED = 4;
+  DISPUTE_STATUS_EXPIRED = 5;
+}
+
+enum DisputeReason {
+  DISPUTE_REASON_UNSPECIFIED = 0;
+  DISPUTE_REASON_FRAUD = 1;
+  DISPUTE_REASON_AUTHORIZATION = 2;
+  DISPUTE_REASON_PROCESSING_ERROR = 3;
+  DISPUTE_REASON_CONSUMER = 4;
+  DISPUTE_REASON_MERCHANT = 5;
+}
+
+message DisputeCase {
+  string dispute_id = 1;
+  string transaction_id = 2;
+  string merchant_id = 3;
+  string issuer_account_id = 4;
+  int64 amount_minor = 5;
+  string currency = 6;
+  DisputeStatus status = 7;
+  DisputeReason reason = 8;
+  int64 opened_at_unix_ms = 9;
+  int64 resolved_at_unix_ms = 10;
+  string evidence_ref = 11;
+}
+
+message OpenDisputeRequest {
+  string transaction_id = 1;
+  string merchant_id = 2;
+  int64 amount_minor = 3;
+  string currency = 4;
+  DisputeReason reason = 5;
+}
+
+message OpenDisputeResponse {
+  DisputeCase dispute = 1;
+}
+
+message SyncDisputeToIcebergRequest {
+  string dispute_id = 1;
+}
+
+message SyncDisputeToIcebergResponse {
+  string dispute_id = 1;
+  bool synced = 2;
+}
+
+service DisputeEngineService {
+  rpc OpenDispute(OpenDisputeRequest) returns (OpenDisputeResponse);
+  rpc SyncDisputeToIceberg(SyncDisputeToIcebergRequest) returns (SyncDisputeToIcebergResponse);
+}

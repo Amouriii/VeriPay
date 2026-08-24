@@ -68,3 +68,38 @@ services:
     build: ../services/feedback_loop
     ports: ["8016:8000"]
     env_file: [.env]
+  # --- Expansion: Banking/FI + Business/Merchant services ---
+  banking_gateway:
+    build: ../services/banking_gateway
+    ports: ["8017:8000"]
+    env_file: [.env]
+    depends_on: [kafka, postgres]
+  merchant_ingress:
+    build: ../services/merchant_ingress
+    ports: ["8018:8000"]
+    env_file: [.env]
+  merchant_policy:
+    build: ../services/merchant_policy
+    ports: ["8019:8000"]
+    env_file: [.env]
+  dispute_engine:
+    build: ../services/dispute_engine
+    ports: ["8020:8000"]
+    env_file: [.env]
+    depends_on: [postgres]
+  compliance_engine:
+    build: ../services/compliance_engine
+    ports: ["8021:8000"]
+    env_file: [.env]
+  fi_ops_portal:
+    build: ../services/fi_ops_portal
+    ports: ["8022:8000"]
+    env_file: [.env]
+  business_portal:
+    build: ../services/business_portal
+    ports: ["8023:8000"]
+    env_file: [.env]
+  corporate_spend:
+    build: ../services/corporate_spend
+    ports: ["8024:8000"]
+    env_file: [.env]

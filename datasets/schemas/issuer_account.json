@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "IssuerAccount",
+  "type": "object",
+  "required": ["issuer_account_id", "bank_routing_number", "settlement_account", "network"],
+  "properties": {
+    "issuer_account_id": { "type": "string" },
+    "bank_routing_number": { "type": "string" },
+    "settlement_account": { "type": "string" },
+    "network": { "enum": ["VISA", "MASTERCARD", "AMEX", "DISCOVER"] }
+  }
+}

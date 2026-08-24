@@ -1,0 +1,87 @@
+// Banking / Financial Institution contracts (PLAN Expansion §1 Dev1, §2).
+// ISO 20022, Visa/MC host messaging, core banking gRPC hooks, settlement.
+syntax = "proto3";
+
+package veripay.banking.v1;
+
+enum CardNetwork {
+  CARD_NETWORK_UNSPECIFIED = 0;
+  CARD_NETWORK_VISA = 1;
+  CARD_NETWORK_MASTERCARD = 2;
+  CARD_NETWORK_AMEX = 3;
+  CARD_NETWORK_DISCOVER = 4;
+}
+
+enum SettlementStatus {
+  SETTLEMENT_STATUS_UNSPECIFIED = 0;
+  SETTLEMENT_STATUS_PENDING = 1;
+  SETTLEMENT_STATUS_SETTLED = 2;
+  SETTLEMENT_STATUS_REJECTED = 3;
+  SETTLEMENT_STATUS_REVERSED = 4;
+}
+
+message IssuerAccount {
+  string issuer_account_id = 1;
+  string bank_routing_number = 2;
+  string settlement_account = 3;
+  CardNetwork network = 4;
+}
+
+message NetworkSettlementBatch {
+  string batch_id = 1;
+  string issuer_account_id = 2;
+  CardNetwork network = 3;
+  int64 total_amount_minor = 4;
+  string currency = 5;
+  int64 settlement_date_unix_ms = 6;
+  SettlementStatus status = 7;
+  int32 transaction_count = 8;
+}
+
+message CardNetworkMessage {
+  string message_id = 1;
+  string batch_id = 2;
+  string raw_message_ref = 3;  // tokenized reference, not raw PAN
+  CardNetwork network = 4;
+  string message_type = 5;  // ISO 20022 message type
+  int64 timestamp_unix_ms = 6;
+}
+
+message LedgerAudit {
+  string ledger_id = 1;
+  string batch_id = 2;
+  string entry_type = 3;  // debit | credit | reversal
+  int64 amount_minor = 4;
+  string currency = 5;
+  string account_ref = 6;
+  int64 posted_at_unix_ms = 7;
+}
+
+message AuthorizeWithBankRequest {
+  string transaction_id = 1;
+  string issuer_account_id = 2;
+  int64 amount_minor = 3;
+  string currency = 4;
+  CardNetwork network = 5;
+}
+
+message AuthorizeWithBankResponse {
+  string transaction_id = 1;
+  string auth_code = 2;
+  string decision = 3;  // DecisionAction as string
+  string reason = 4;
+}
+
+message SyncSettlementRequest {
+  string batch_id = 1;
+}
+
+message SyncSettlementResponse {
+  NetworkSettlementBatch batch = 1;
+  bool synced = 2;
+}
+
+service BankingGatewayService {
+  rpc AuthorizeWithBank(AuthorizeWithBankRequest) returns (AuthorizeWithBankResponse);
+  rpc SyncSettlement(SyncSettlementRequest) returns (SyncSettlementResponse);
+}
