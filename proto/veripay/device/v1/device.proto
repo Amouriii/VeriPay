@@ -1,12 +1,13 @@
 // Device integrity, GPV signal, challenge nonces (PLAN §14, §15, §16).
 syntax = "proto3";
+
 package veripay.device.v1;
 
 enum GpvOutcome {
-  GPV_UNSPECIFIED = 0;
-  MATCHED = 1;       // <= 100m
-  LIKELY_MATCH = 2;  // 100-300m
-  MISMATCHED = 3;    // > 300m
+  GPV_OUTCOME_UNSPECIFIED = 0;
+  GPV_OUTCOME_MATCHED = 1;       // <= 100m
+  GPV_OUTCOME_LIKELY_MATCH = 2;  // 100-300m
+  GPV_OUTCOME_MISMATCHED = 3;    // > 300m
 }
 
 message DeviceIntegritySignal {
@@ -30,13 +31,25 @@ message GpvSignal {
   double gps_accuracy_radius_m = 7;
 }
 
-message ChallengeNonce {
+message VerifyAttestationRequest {
+  DeviceIntegritySignal signal = 1;
+}
+
+message VerifyAttestationResponse {
   string challenge_id = 1;
   string nonce = 2;               // 128-bit, 90s expiry
   int64 expires_at_unix_ms = 3;
 }
 
-service DeviceIntegrity {
-  rpc VerifyAttestation(DeviceIntegritySignal) returns (ChallengeNonce);
-  rpc RecordGpv(GpvSignal) returns (GpvSignal);
+message RecordGpvRequest {
+  GpvSignal signal = 1;
+}
+
+message RecordGpvResponse {
+  GpvSignal signal = 1;
+}
+
+service DeviceIntegrityService {
+  rpc VerifyAttestation(VerifyAttestationRequest) returns (VerifyAttestationResponse);
+  rpc RecordGpv(RecordGpvRequest) returns (RecordGpvResponse);
 }

@@ -1,5 +1,6 @@
 // Online feature store lookups (PLAN §8, §9).
 syntax = "proto3";
+
 package veripay.features.v1;
 
 message FeatureVector {
@@ -55,18 +56,18 @@ message FeatureVector {
   string seasonal_event = 43;
 }
 
-message FeatureLookupRequest {
+message LookupRequest {
   string transaction_id = 1;
   string user_id = 2;
   string merchant_id = 3;
   int64 now_unix_ms = 4;
 }
 
-message FeatureLookupResponse {
+message LookupResponse {
   FeatureVector vector = 1;
   int64 staleness_ms = 2;
 }
 
-service FeatureStore {
-  rpc Lookup(FeatureLookupRequest) returns (FeatureLookupResponse);
+service FeatureStoreService {
+  rpc Lookup(LookupRequest) returns (LookupResponse);
 }

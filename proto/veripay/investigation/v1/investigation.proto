@@ -1,5 +1,6 @@
 // LLM investigation & explainability (PLAN §20).
 syntax = "proto3";
+
 package veripay.investigation.v1;
 
 message ShapAttribution {
@@ -8,19 +9,19 @@ message ShapAttribution {
   string direction = 3;        // "increases" | "decreases"
 }
 
-message InvestigationRequest {
+message SummarizeRequest {
   string transaction_id = 1;
   string risk_summary_json = 2; // serialized RiskScore + ComponentScore
   repeated ShapAttribution attributions = 3;
 }
 
-message InvestigationResponse {
+message SummarizeResponse {
   string transaction_id = 1;
   string analyst_summary = 2;   // LLM-generated readable summary
   // Guardrails: the LLM cannot block accounts, alter models, or override rules.
   bool guardrail_violation = 3;
 }
 
-service InvestigationAgent {
-  rpc Summarize(InvestigationRequest) returns (InvestigationResponse);
+service InvestigationAgentService {
+  rpc Summarize(SummarizeRequest) returns (SummarizeResponse);
 }

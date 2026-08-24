@@ -1,28 +1,29 @@
 // Token vault & dCVV validation (PLAN §6.1, §22 — VirtualCardToken entity).
 syntax = "proto3";
+
 package veripay.token.v1;
 
 enum TokenType {
   TOKEN_TYPE_UNSPECIFIED = 0;
-  SINGLE_USE = 1;
-  MERCHANT_LOCKED = 2;
-  SUBSCRIPTION = 3;
-  DYNAMIC_CVV = 4;
+  TOKEN_TYPE_SINGLE_USE = 1;
+  TOKEN_TYPE_MERCHANT_LOCKED = 2;
+  TOKEN_TYPE_SUBSCRIPTION = 3;
+  TOKEN_TYPE_DYNAMIC_CVV = 4;
 }
 
 enum DcvvStatus {
-  DCVV_UNSPECIFIED = 0;
-  MATCH = 1;
-  MISMATCH = 2;
-  EXPIRED = 3;
-  NOT_APPLICABLE = 4;
+  DCVV_STATUS_UNSPECIFIED = 0;
+  DCVV_STATUS_MATCH = 1;
+  DCVV_STATUS_MISMATCH = 2;
+  DCVV_STATUS_EXPIRED = 3;
+  DCVV_STATUS_NOT_APPLICABLE = 4;
 }
 
 enum TokenStatus {
   TOKEN_STATUS_UNSPECIFIED = 0;
-  ACTIVE = 1;
-  EXHAUSTED = 2;
-  REVOKED = 3;
+  TOKEN_STATUS_ACTIVE = 1;
+  TOKEN_STATUS_EXHAUSTED = 2;
+  TOKEN_STATUS_REVOKED = 3;
 }
 
 message VirtualCardToken {
@@ -52,6 +53,6 @@ message DetokenizeResponse {
   bool merchant_lock_ok = 4;
 }
 
-service TokenVault {
+service TokenVaultService {
   rpc Detokenize(DetokenizeRequest) returns (DetokenizeResponse);
 }

@@ -1,15 +1,16 @@
 // Cost-aware decision routing (PLAN §19).
 syntax = "proto3";
+
 package veripay.decision.v1;
 
 enum DecisionAction {
-  DECISION_UNSPECIFIED = 0;
-  ALLOW = 1;
-  MONITOR = 2;
-  CHALLENGE = 3;
-  REVIEW = 4;
-  DECLINE = 5;
-  REVERSE = 6;
+  DECISION_ACTION_UNSPECIFIED = 0;
+  DECISION_ACTION_ALLOW = 1;
+  DECISION_ACTION_MONITOR = 2;
+  DECISION_ACTION_CHALLENGE = 3;
+  DECISION_ACTION_REVIEW = 4;
+  DECISION_ACTION_DECLINE = 5;
+  DECISION_ACTION_REVERSE = 6;
 }
 
 message DecisionRequest {
@@ -29,6 +30,6 @@ message DecisionResponse {
   optional string challenge_id = 4;
 }
 
-service DecisionEngine {
+service DecisionEngineService {
   rpc Decide(DecisionRequest) returns (DecisionResponse);
 }
