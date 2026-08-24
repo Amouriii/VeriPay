@@ -1,0 +1,22 @@
+[project]
+name = "veripay-corporate_spend"
+version = "0.1.0"
+description = "Corporate Spend Service (Expansion §1 Dev1, §2) - Per-merchant spend tracking, corporate VCN policy enforcement."
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.7",
+    "veripay-common",
+]
+
+[project.scripts]
+veripay-corporate_spend = "veripay_corporate_spend.main:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["veripay_corporate_spend*"]

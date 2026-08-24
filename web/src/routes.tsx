@@ -4,4 +4,6 @@ export const ROUTES = {
   transaction: '/tx/:id',
   investigation: '/investigation/:id',
   feedback: '/feedback',
+  fiOps: '/fi-ops',
+  treasury: '/treasury',
 } as const;

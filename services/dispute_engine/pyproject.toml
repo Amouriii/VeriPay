@@ -1,0 +1,22 @@
+[project]
+name = "veripay-dispute_engine"
+version = "0.1.0"
+description = "Dispute Engine (Expansion §1 Dev5, §3) - Chargeback/dispute lifecycle, async sync to Iceberg for retraining."
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.7",
+    "veripay-common",
+]
+
+[project.scripts]
+veripay-dispute_engine = "veripay_dispute_engine.main:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["veripay_dispute_engine*"]

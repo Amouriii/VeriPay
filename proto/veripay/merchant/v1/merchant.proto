@@ -1,0 +1,99 @@
+// Business / Merchant contracts (PLAN Expansion §1 Dev1, §2).
+// Merchant ingress APIs, VCN issuance, webhook push, corporate spend policy.
+syntax = "proto3";
+
+package veripay.merchant.v1;
+
+enum MerchantCategory {
+  MERCHANT_CATEGORY_UNSPECIFIED = 0;
+  MERCHANT_CATEGORY_ECOMMERCE = 1;
+  MERCHANT_CATEGORY_B2B_CORPORATE = 2;
+  MERCHANT_CATEGORY_RETAIL = 3;
+  MERCHANT_CATEGORY_DIGITAL_GOODS = 4;
+}
+
+enum WebhookDecision {
+  WEBHOOK_DECISION_UNSPECIFIED = 0;
+  WEBHOOK_DECISION_ALLOW = 1;
+  WEBHOOK_DECISION_BLOCK = 2;
+  WEBHOOK_DECISION_VERIFY = 3;
+}
+
+message MerchantProfile {
+  string merchant_id = 1;
+  string business_name = 2;
+  MerchantCategory category = 3;
+  string mcc = 4;
+  string webhook_url = 5;
+  bool active = 6;
+}
+
+message MerchantLockRule {
+  string lock_id = 1;
+  string merchant_id = 2;
+  string allowed_mccs = 3;       // comma-separated MCC list
+  int64 max_spend_per_txn_minor = 4;
+  int64 daily_spend_limit_minor = 5;
+  bool enforce_merchant_lock = 6;
+}
+
+message CorporateVCNPolicy {
+  string policy_id = 1;
+  string business_id = 2;
+  int64 max_vendor_spend_minor = 3;
+  int64 monthly_spend_limit_minor = 4;
+  string allowed_mccs = 5;
+  int64 vcn_expiry_hours = 6;
+  bool require_biometric_provisioning = 7;
+}
+
+message IssueVCNRequest {
+  string business_id = 1;
+  string merchant_id = 2;
+  string policy_id = 3;
+  int64 amount_minor = 4;
+  string currency = 5;
+}
+
+message IssueVCNResponse {
+  string vcn = 1;
+  string token_id = 2;
+  int64 expires_at_unix_ms = 3;
+}
+
+message PushWebhookRequest {
+  string merchant_id = 1;
+  string transaction_id = 2;
+  WebhookDecision decision = 3;
+  int64 risk_score = 4;
+  string reason_code = 5;
+}
+
+message PushWebhookResponse {
+  string merchant_id = 1;
+  bool delivered = 2;
+  int64 http_status = 3;
+}
+
+message TrackSpendRequest {
+  string business_id = 1;
+  string merchant_id = 2;
+  int64 amount_minor = 3;
+  string currency = 4;
+}
+
+message TrackSpendResponse {
+  string business_id = 1;
+  int64 monthly_total_minor = 2;
+  int64 remaining_limit_minor = 3;
+  bool within_limit = 4;
+}
+
+service MerchantIngressService {
+  rpc IssueVCN(IssueVCNRequest) returns (IssueVCNResponse);
+  rpc PushWebhook(PushWebhookRequest) returns (PushWebhookResponse);
+}
+
+service CorporateSpendService {
+  rpc TrackSpend(TrackSpendRequest) returns (TrackSpendResponse);
+}

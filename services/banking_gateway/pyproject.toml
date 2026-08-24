@@ -1,0 +1,22 @@
+[project]
+name = "veripay-banking_gateway"
+version = "0.1.0"
+description = "Banking Gateway (Expansion §1 Dev1, §2) - ISO 20022, Visa/MC host messaging, core banking gRPC hooks, settlement sync."
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.7",
+    "veripay-common",
+]
+
+[project.scripts]
+veripay-banking_gateway = "veripay_banking_gateway.main:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["veripay_banking_gateway*"]

@@ -1,0 +1,50 @@
+// Compliance & regulatory contracts (PLAN Expansion §1 Dev4, §2).
+// PCI-DSS 4.0, PSD3/SCA regulatory compliance triggers, network zero-trust.
+syntax = "proto3";
+
+package veripay.compliance.v1;
+
+enum ComplianceStandard {
+  COMPLIANCE_STANDARD_UNSPECIFIED = 0;
+  COMPLIANCE_STANDARD_PCI_DSS_4_0 = 1;
+  COMPLIANCE_STANDARD_PSD3_SCA = 2;
+  COMPLIANCE_STANDARD_NETWORK_ZERO_TRUST = 3;
+}
+
+enum ScaExemption {
+  SCA_EXEMPTION_UNSPECIFIED = 0;
+  SCA_EXEMPTION_LOW_VALUE = 1;
+  SCA_EXEMPTION_TRUSTED_BENEFICIARY = 2;
+  SCA_EXEMPTION_RECURRING = 3;
+  SCA_EXEMPTION_CORPORATE = 4;
+  SCA_EXEMPTION_NONE = 5;
+}
+
+message ComplianceTrigger {
+  string trigger_id = 1;
+  string transaction_id = 2;
+  ComplianceStandard standard = 3;
+  string requirement = 4;
+  bool satisfied = 5;
+  string detail = 6;
+}
+
+message EvaluateComplianceRequest {
+  string transaction_id = 1;
+  int64 amount_minor = 2;
+  string currency = 3;
+  string channel = 4;  // CARD_PRESENT | CARD_NOT_PRESENT
+  bool merchant_initiated = 5;
+}
+
+message EvaluateComplianceResponse {
+  string transaction_id = 1;
+  bool compliant = 2;
+  repeated ComplianceTrigger triggers = 3;
+  ScaExemption sca_exemption = 4;
+  bool requires_step_up = 5;
+}
+
+service ComplianceEngineService {
+  rpc EvaluateCompliance(EvaluateComplianceRequest) returns (EvaluateComplianceResponse);
+}

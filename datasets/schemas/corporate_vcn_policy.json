@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CorporateVCNPolicy",
+  "type": "object",
+  "required": ["policy_id", "business_id"],
+  "properties": {
+    "policy_id": { "type": "string" },
+    "business_id": { "type": "string" },
+    "max_vendor_spend_minor": { "type": ["integer", "null"] },
+    "monthly_spend_limit_minor": { "type": ["integer", "null"] },
+    "allowed_mccs": { "type": ["string", "null"] },
+    "vcn_expiry_hours": { "type": ["integer", "null"] },
+    "require_biometric_provisioning": { "type": "boolean" }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ComplianceTrigger",
+  "type": "object",
+  "required": ["trigger_id", "transaction_id", "standard", "requirement"],
+  "properties": {
+    "trigger_id": { "type": "string" },
+    "transaction_id": { "type": "string" },
+    "standard": { "enum": ["PCI_DSS_4_0", "PSD3_SCA", "NETWORK_ZERO_TRUST"] },
+    "requirement": { "type": "string" },
+    "satisfied": { "type": "boolean" },
+    "detail": { "type": ["string", "null"] }
+  }
+}

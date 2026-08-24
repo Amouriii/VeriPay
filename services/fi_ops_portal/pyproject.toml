@@ -1,0 +1,22 @@
+[project]
+name = "veripay-fi_ops_portal"
+version = "0.1.0"
+description = "FI Ops Portal (Expansion §1 Dev5, §2) - Institutional fraud ops console, regulatory audit dashboard."
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.7",
+    "veripay-common",
+]
+
+[project.scripts]
+veripay-fi_ops_portal = "veripay_fi_ops_portal.main:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["veripay_fi_ops_portal*"]
