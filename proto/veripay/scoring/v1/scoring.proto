@@ -1,0 +1,30 @@
+// Model scoring gRPC service (Contributions.md Dev 4, §4.1).
+// High-throughput inference endpoint for supervised, anomaly, and graph models.
+syntax = "proto3";
+
+package veripay.scoring.v1;
+
+enum ModelType {
+  MODEL_TYPE_UNSPECIFIED = 0;
+  MODEL_TYPE_SUPERVISED = 1;
+  MODEL_TYPE_ANOMALY = 2;
+  MODEL_TYPE_GRAPH = 3;
+}
+
+message ScoringRequest {
+  string transaction_id = 1;
+  ModelType model_type = 2;
+  string feature_vector_json = 3;  // serialized FeatureVector
+}
+
+message ScoringResponse {
+  string transaction_id = 1;
+  ModelType model_type = 2;
+  int32 score = 3;                 // 0-100
+  string reason_code = 4;          // e.g. DCVV_MISMATCH
+  double model_version = 5;
+}
+
+service ModelScoringService {
+  rpc ScoreTransaction(ScoringRequest) returns (ScoringResponse);
+}

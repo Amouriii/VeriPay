@@ -1,0 +1,18 @@
+{
+  "type": "record",
+  "name": "TransactionFeaturesEnriched",
+  "namespace": "veripay.streaming",
+  "fields": [
+    { "name": "transaction_id", "type": "string" },
+    { "name": "user_id", "type": "string" },
+    { "name": "vcn_indicator", "type": "boolean" },
+    { "name": "tx_count_5m", "type": "int" },
+    { "name": "tx_count_1h", "type": "int" },
+    { "name": "spend_1h", "type": "double" },
+    { "name": "token_gen_1h", "type": "int" },
+    { "name": "failed_dcvv_attempts", "type": "int" },
+    { "name": "amount_zscore", "type": "double" },
+    { "name": "impossible_travel", "type": "boolean" },
+    { "name": "timestamp_unix_ms", "type": "long" }
+  ]
+}

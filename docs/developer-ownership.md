@@ -1,80 +1,133 @@
-# Developer Work-Tree Ownership Map
+# Developer Work-Tree Allocation & Parallel Architecture
 
-This document maps the expanded Banking/FI and Business/Merchant domains to
-five parallel developer work-trees. Each developer owns a disjoint set of
-directories and merges cleanly except at the shared `proto/` + `libs/` boundary.
+This document is the authoritative developer contribution plan, matching the
+Contributions.md specification. Five engineers work concurrently with zero
+work-tree contention using a contract-first architecture.
 
-## Ownership matrix
+## Architecture overview
 
-### Developer 1 — Gateway & Protocols
-Owns all network-facing ingress and protocol translation.
+```
+               +-------------------------------------------------------+
+               |             DEV 1 (BE) + DEV 2 (FE) PAIR              |
+               | Ingress Gateway, Web Apps, Portals & API Integration  |
+               +---------------------------+---------------------------+
+                                           |
+    +--------------------------------------+--------------------------------------+
+    |                                      |                                      |
+    v                                      v                                      v
++-----------------------+      +-----------------------+      +-----------------------+
+|        DEV 3          |      |        DEV 4          |      |        DEV 5          |
+|  Inference LLM Agent  |      |  Data Preprocessing   |      |   Policy, Security,   |
+|   & Explainability    |      |      & ML Models      |      |   Mobile & "The Rest" |
++-----------------------+      +-----------------------+      +-----------------------+
+```
 
-| Service / dir | Domain | Responsibility |
-|---|---|---|
-| `services/ingress` | Core | ISO 8583 + REST/gRPC ingestion, dual-phase entry |
-| `services/banking_gateway` | FI | ISO 20022 XML, Visa/MC host messaging, core banking gRPC hooks |
-| `services/merchant_ingress` | Business | Merchant Ingress APIs, VCN issuance endpoints, webhook push engine |
+## Dev 1 (Backend & API Gateway) — Full-Stack Pair (BE)
 
-### Developer 2 — Data Pipeline & Ledger Streaming
-Owns all Kafka/Flink streaming and ledger synchronization.
+**Primary repository:** `repo-app-backend`
+**Scope:** Financial Ingress, Token Vault Integration, Web Hooks, Backend APIs.
 
-| Service / dir | Domain | Responsibility |
-|---|---|---|
-| `services/audit_store` | Core | PostgreSQL audit trails, VCN registry |
-| `services/feature_store` | Core | Redis/RonDB online feature read/write |
-| `streaming/jobs/velocity_aggregations.py` | Core | tx_count_5m/1h/24h, spend windows |
-| `streaming/jobs/token_velocity.py` | Core | VCN generation, failed dCVV, revoked counts |
-| `streaming/jobs/behavioral_features.py` | Core | z-score, 7/30-day limits |
-| `streaming/jobs/raw_event_sink.py` | Core | Kafka → PG/Iceberg audit sink |
-| `streaming/jobs/settlement_sync.py` | FI | Bank settlement streams, clearing files, ACH/FedNow ledger sync |
-| `streaming/jobs/merchant_aggregations.py` | Business | Per-merchant velocity, merchant aggregations, corporate spend tracking |
+| Service / dir | Responsibility |
+|---|---|
+| `services/ingress` | ISO 8583 parsing (0100/0110/0400), REST/gRPC ingestion |
+| `services/token_vault` | PCI-DSS Token Vault (HashiCorp/VGS), VCN detokenization, dCVV validation |
+| `services/banking_gateway` | Core banking authorization hooks, ISO 20022, settlement sync |
+| `services/merchant_ingress` | Merchant Ingress APIs, VCN issuance, webhook push engine |
+| `services/corporate_spend` | Per-merchant spend tracking, corporate VCN policy |
+| `services/audit_store` | PostgreSQL audit trails, VCN registry, state |
+| `services/auth_orchestration` | 3DS/biometric/WebAuthn step-up backend |
 
-### Developer 3 — Risk AI & Institutional Models
-Owns all ML models, training pipelines, and risk scoring.
+**Day-1 contracts:** OpenAPI specs for `/api/v1/transactions`, `/api/v1/disputes`,
+`/api/v1/merchant/rules`.
 
-| Service / dir | Domain | Responsibility |
-|---|---|---|
-| `services/supervised_model` | Core | XGBoost/LightGBM serving + TreeSHAP |
-| `services/anomaly_model` | Core | Isolation Forest, normalized 0-100 score |
-| `services/graph_engine` | Core | Entity graph features, graph_risk_score |
-| `services/risk_fusion` | Core | Weighted fusion → unified 0-100 score |
-| `ml/supervised/` | Core | XGBoost training pipeline |
-| `ml/anomaly/` | Core | Isolation Forest training |
-| `ml/graph/` | Core | Graph feature extraction |
-| `ml/fusion/` | Core | Fusion weight tuning |
-| `ml/issuer_risk/` | FI | Portfolio-wide issuer risk models |
-| `ml/fraud_ring/` | FI | Cross-institutional fraud ring engines |
-| `ml/merchant_risk/` | Business | Merchant category risk profiling, collusion models |
-| `ml/b2b_credit/` | Business | B2B supplier credit risk algorithms |
+## Dev 2 (Frontend Applications & Portals) — Full-Stack Pair (FE)
 
-### Developer 4 — Policy, Compliance & Business Rules
-Owns all deterministic rules, compliance, and customizable business policy.
+**Primary repository:** `repo-web-frontends`
+**Scope:** Web apps, UIs, out-of-band auth interfaces.
 
-| Service / dir | Domain | Responsibility |
-|---|---|---|
-| `services/rule_engine` | Core | Hard rules: dCVV mismatch, merchant-lock, burner velocity |
-| `services/financial_context` | Core | Cash-flow / behavioral baseline |
-| `services/external_context` | Core | Economic / seasonal / geographic normalization |
-| `services/compliance_engine` | FI | PCI-DSS 4.0, PSD3/SCA triggers, network zero-trust constraints |
-| `services/merchant_policy` | Business | Custom velocity rules, MCC restrictions, dynamic merchant-lock |
+| Service / dir | Responsibility |
+|---|---|
+| `web/` | Vite + React + TS + Tailwind frontend |
+| `web/src/pages/Dashboard.tsx` | Fraud Operations Portal: investigation UI, risk scores, TreeSHAP |
+| `web/src/pages/FiOpsConsole.tsx` | Institutional Bank Console: settlement, portfolio risk, disputes |
+| `web/src/pages/BusinessTreasury.tsx` | Business & Merchant Portal: spend controls, VCN policy, disputes |
+| `web/src/pages/Investigation.tsx` | LLM copilot interaction, review feedback workflows |
+| `web/src/pages/TransactionDetail.tsx` | Real-time risk score display, SHAP reason codes |
+| Consumer Web Ingress (in `web/`) | Browser telemetry, WebAuthn triggers, EMV 3DS 2.3 web challenge flows |
 
-### Developer 5 — Operations & Analytics Portals
-Owns all operator-facing services, portals, and feedback loops.
+**Day-1 approach:** Uses MSW (Mock Service Worker) to build all React UI
+components against frozen OpenAPI specs without waiting for live backend.
 
-| Service / dir | Domain | Responsibility |
-|---|---|---|
-| `services/decision_engine` | Core | Cost-aware router → DecisionAction |
-| `services/investigation_agent` | Core | LLM copilot + explainability |
-| `services/auth_orchestration` | Core | 3DS/biometric/WebAuthn step-up |
-| `services/feedback_loop` | Core | Analyst review labels → Iceberg, drift/retrain |
-| `services/dispute_engine` | Both | Chargeback/dispute lifecycle, regulatory reporting |
-| `services/fi_ops_portal` | FI | Institutional fraud ops console, regulatory audit dashboard |
-| `services/business_portal` | Business | B2B treasury portal, merchant fraud manager, ERP sync |
-| `web/` | Both | Analyst dashboard + new FI/Business portal pages |
+## Dev 3 (Inference LLM Agent & Explainability) — AI Specialist
+
+**Primary repository:** `repo-llm-copilot`
+**Scope:** Natural language intelligence, explainability, analyst assistance.
+
+| Service / dir | Responsibility |
+|---|---|
+| `services/investigation_agent` | LLM Copilot Engine, async investigation endpoints |
+| `ml/supervised/` (TreeSHAP) | Fast TreeSHAP determinism for XGBoost/LightGBM |
+
+**Key contracts:**
+- REST endpoint `/api/v1/investigate/{tx_id}` — accepts feature attribution
+  arrays, returns structured markdown summaries.
+- LLM Guardrails: zero auto-decision authority (cannot block accounts or alter rules).
+
+## Dev 4 (Data Preprocessing, Streaming & ML) — ML / Data Engineer
+
+**Primary repository:** `repo-data-ml`
+**Scope:** Event streaming, feature engineering, ML models.
+
+| Service / dir | Responsibility |
+|---|---|
+| `services/feature_store` | Redis Cluster / RonDB online feature store |
+| `services/supervised_model` | XGBoost/LightGBM serving via gRPC |
+| `services/anomaly_model` | Isolation Forest serving |
+| `services/graph_engine` | Coordinated fraud network analysis |
+| `streaming/jobs/*.py` | All 7 Flink jobs (velocity, token, behavioral, raw sink, settlement, merchant, dispute) |
+| `ml/supervised/` | XGBoost training pipeline |
+| `ml/anomaly/` | Isolation Forest training |
+| `ml/graph/` | Graph feature extraction |
+| `ml/fusion/` | Fusion weight tuning |
+| `ml/issuer_risk/` | Portfolio-wide issuer risk models |
+| `ml/fraud_ring/` | Cross-institutional fraud ring engines |
+| `ml/merchant_risk/` | Merchant category risk profiling |
+| `ml/b2b_credit/` | B2B supplier credit risk |
+
+**Key contract:** gRPC `ModelScoringService` (see `proto/veripay/scoring/v1/scoring.proto`).
+**Kafka topics:** `tx.ingress.raw`, `tx.features.enriched` (Avro schemas in `datasets/schemas/avro/`).
+
+## Dev 5 (Policy, Security, Mobile & Core Engine) — Core Systems Engineer
+
+**Primary repository:** `repo-policy-core`
+**Scope:** Native mobile, GPV, rules, fusion, local infra.
+
+| Service / dir | Responsibility |
+|---|---|
+| `services/rule_engine` | dCVV mismatch, merchant-lock, burner velocity, zero-trust |
+| `services/risk_fusion` | Weighted fusion to 0-100 unified score |
+| `services/decision_engine` | Cost-aware decision router (ALLOW/VERIFY/BLOCK/REVERSE) |
+| `services/device_integrity` | GPV engine, H3 spatial indexing, challenge nonces |
+| `services/compliance_engine` | PCI-DSS 4.0, PSD3/SCA, network zero-trust |
+| `services/merchant_policy` | Custom velocity rules, MCC restrictions |
+| `services/financial_context` | Cash-flow / behavioral baseline |
+| `services/external_context` | Economic / seasonal / geographic normalization |
+| `services/feedback_loop` | Analyst review labels to Iceberg, drift/retrain |
+| `services/dispute_engine` | Chargeback/dispute lifecycle, regulatory reporting |
+| `services/fi_ops_portal` | Institutional fraud ops console backend |
+| `services/business_portal` | B2B treasury portal backend |
+| `mobile/ios/` | Secure Enclave ECDSA P-256, App Attest, biometric step-up |
+| `mobile/android/` | Android Keystore, Play Integrity, biometric step-up |
+| `infra/compose/` | `docker-compose.dev.yml` local infra (Kafka, Redis, PG, WireMock) |
 
 ## Shared boundary (merge-coordination point)
-- `proto/` — wire contracts (all developers coordinate here)
+
+All five developers coordinate changes at these narrow boundaries:
+
+- `proto/` — wire contracts (Protobuf definitions)
 - `libs/` — read-only shared code mirroring proto
-- `datasets/migrations/` — shared SQL schema (coordinate changes)
+- `datasets/migrations/` — shared SQL schema
+- `datasets/schemas/avro/` — Kafka Avro schemas
+- `docs/contracts/` — OpenAPI specs and contract-first execution plan
 
 Everything else is owned by exactly one developer's work-tree.

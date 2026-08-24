@@ -1,0 +1,205 @@
+# VeriPay OpenAPI Spec — Day-1 frozen endpoints (Contributions.md §4.1).
+# Dev 2 uses MSW/WireMock to build UI against these specs before backend is live.
+openapi: 3.0.3
+info:
+  title: VeriPay API
+  version: 1.0.0
+  description: Frozen Day-1 contract for parallel development.
+
+paths:
+  /api/v1/transactions:
+    get:
+      summary: List transactions
+      responses:
+        "200":
+          description: Transaction list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Transaction"
+    post:
+      summary: Submit a transaction for risk evaluation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Transaction"
+      responses:
+        "200":
+          description: Authorization response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthorizationResponse"
+
+  /api/v1/transactions/{tx_id}/risk:
+    get:
+      summary: Get risk score for a transaction
+      parameters:
+        - name: tx_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Risk score
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RiskScore"
+
+  /api/v1/disputes:
+    get:
+      summary: List dispute cases
+      responses:
+        "200":
+          description: Dispute list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DisputeCase"
+    post:
+      summary: Open a new dispute
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DisputeCase"
+      responses:
+        "201":
+          description: Dispute created
+
+  /api/v1/merchant/rules:
+    get:
+      summary: List merchant lock rules
+      responses:
+        "200":
+          description: Rule list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MerchantLockRule"
+    post:
+      summary: Create a merchant lock rule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MerchantLockRule"
+      responses:
+        "201":
+          description: Rule created
+
+  /api/v1/investigate/{tx_id}:
+    post:
+      summary: LLM investigation — synthesize risk evidence into analyst summary
+      parameters:
+        - name: tx_id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InvestigationRequest"
+      responses:
+        "200":
+          description: Investigation summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvestigationResponse"
+
+components:
+  schemas:
+    Transaction:
+      type: object
+      required: [transaction_id, user_id, amount_minor, currency]
+      properties:
+        transaction_id: { type: string }
+        user_id: { type: string }
+        amount_minor: { type: integer }
+        currency: { type: string }
+        merchant_id: { type: string }
+        mti: { type: string, enum: ["0100", "0110", "0400"] }
+        channel: { type: string, enum: ["CARD_PRESENT", "CARD_NOT_PRESENT"] }
+
+    AuthorizationResponse:
+      type: object
+      properties:
+        transaction_id: { type: string }
+        decision: { type: string, enum: ["ALLOW", "MONITOR", "CHALLENGE", "REVIEW", "DECLINE", "REVERSE"] }
+        risk_score: { type: integer, minimum: 0, maximum: 100 }
+        reason_code: { type: string }
+        challenge_id: { type: string }
+
+    RiskScore:
+      type: object
+      properties:
+        transaction_id: { type: string }
+        unified_score: { type: integer, minimum: 0, maximum: 100 }
+        band: { type: string, enum: ["APPROVE", "VERIFY", "BLOCK"] }
+        components:
+          type: array
+          items:
+            type: object
+            properties:
+              component: { type: string }
+              score: { type: integer }
+              weight: { type: number }
+              available: { type: boolean }
+              reason_code: { type: string }
+
+    DisputeCase:
+      type: object
+      required: [dispute_id, transaction_id, amount_minor, currency, status, reason]
+      properties:
+        dispute_id: { type: string }
+        transaction_id: { type: string }
+        merchant_id: { type: string }
+        amount_minor: { type: integer }
+        currency: { type: string }
+        status: { type: string, enum: ["OPENED", "REPRESENTED", "ACCEPTED", "REVERSED", "EXPIRED"] }
+        reason: { type: string, enum: ["FRAUD", "AUTHORIZATION", "PROCESSING_ERROR", "CONSUMER", "MERCHANT"] }
+
+    MerchantLockRule:
+      type: object
+      properties:
+        lock_id: { type: string }
+        merchant_id: { type: string }
+        allowed_mccs: { type: string }
+        max_spend_per_txn_minor: { type: integer }
+        daily_spend_limit_minor: { type: integer }
+        enforce_merchant_lock: { type: boolean }
+
+    InvestigationRequest:
+      type: object
+      properties:
+        transaction_id: { type: string }
+        risk_summary_json: { type: string }
+        attributions:
+          type: array
+          items:
+            type: object
+            properties:
+              reason_code: { type: string }
+              shap_value: { type: number }
+              direction: { type: string }
+
+    InvestigationResponse:
+      type: object
+      properties:
+        transaction_id: { type: string }
+        analyst_summary: { type: string }
+        guardrail_violation: { type: boolean }

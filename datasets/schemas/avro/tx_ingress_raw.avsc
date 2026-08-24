@@ -1,0 +1,16 @@
+{
+  "type": "record",
+  "name": "TransactionIngressRaw",
+  "namespace": "veripay.streaming",
+  "fields": [
+    { "name": "transaction_id", "type": "string" },
+    { "name": "user_id", "type": "string" },
+    { "name": "mti", "type": { "type": "enum", "name": "Mti", "symbols": ["0100", "0110", "0400"] } },
+    { "name": "channel", "type": { "type": "enum", "name": "Channel", "symbols": ["CARD_PRESENT", "CARD_NOT_PRESENT"] } },
+    { "name": "merchant_id", "type": "string" },
+    { "name": "amount_minor", "type": "long" },
+    { "name": "currency", "type": "string" },
+    { "name": "payment_instrument", "type": "string" },
+    { "name": "timestamp_unix_ms", "type": "long" }
+  ]
+}
