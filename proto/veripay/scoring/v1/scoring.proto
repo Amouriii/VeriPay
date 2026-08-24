@@ -11,13 +11,13 @@ enum ModelType {
   MODEL_TYPE_GRAPH = 3;
 }
 
-message ScoringRequest {
+message ScoreTransactionRequest {
   string transaction_id = 1;
   ModelType model_type = 2;
   string feature_vector_json = 3;  // serialized FeatureVector
 }
 
-message ScoringResponse {
+message ScoreTransactionResponse {
   string transaction_id = 1;
   ModelType model_type = 2;
   int32 score = 3;                 // 0-100
@@ -26,5 +26,5 @@ message ScoringResponse {
 }
 
 service ModelScoringService {
-  rpc ScoreTransaction(ScoringRequest) returns (ScoringResponse);
+  rpc ScoreTransaction(ScoreTransactionRequest) returns (ScoreTransactionResponse);
 }
