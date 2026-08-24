@@ -1,0 +1,27 @@
+// LLM investigation & explainability (PLAN §20).
+syntax = "proto3";
+
+package veripay.investigation.v1;
+
+message ShapAttribution {
+  string reason_code = 1;     // e.g. DCVV_MISMATCH, MERCHANT_LOCK_VIOLATION, NEW_DEVICE
+  double shap_value = 2;
+  string direction = 3;        // "increases" | "decreases"
+}
+
+message SummarizeRequest {
+  string transaction_id = 1;
+  string risk_summary_json = 2; // serialized RiskScore + ComponentScore
+  repeated ShapAttribution attributions = 3;
+}
+
+message SummarizeResponse {
+  string transaction_id = 1;
+  string analyst_summary = 2;   // LLM-generated readable summary
+  // Guardrails: the LLM cannot block accounts, alter models, or override rules.
+  bool guardrail_violation = 3;
+}
+
+service InvestigationAgentService {
+  rpc Summarize(SummarizeRequest) returns (SummarizeResponse);
+}

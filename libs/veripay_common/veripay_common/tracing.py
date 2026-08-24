@@ -1,4 +1,5 @@
 """OpenTelemetry tracing setup shared by all services (stub)."""
+
 from __future__ import annotations
 
 

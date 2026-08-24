@@ -4,13 +4,10 @@ Single source of truth for string values flowing between services. Proto
 definitions remain authoritative for the wire format; these enums are the
 ergonomic Python mirror used inside services.
 """
+
 from __future__ import annotations
 
-from enum import Enum
-
-
-class StrEnum(str, Enum):
-    """A string enum that serializes to its value."""
+from enum import StrEnum
 
 
 class Mti(StrEnum):

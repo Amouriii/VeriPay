@@ -1,0 +1,55 @@
+// Device integrity, GPV signal, challenge nonces (PLAN §14, §15, §16).
+syntax = "proto3";
+
+package veripay.device.v1;
+
+enum GpvOutcome {
+  GPV_OUTCOME_UNSPECIFIED = 0;
+  GPV_OUTCOME_MATCHED = 1;       // <= 100m
+  GPV_OUTCOME_LIKELY_MATCH = 2;  // 100-300m
+  GPV_OUTCOME_MISMATCHED = 3;    // > 300m
+}
+
+message DeviceIntegritySignal {
+  string device_id = 1;
+  string platform = 2;            // ios | android
+  string attestation_payload = 3; // App Attest / Play Integrity blob
+  string public_key_pem = 4;     // ECDSA P-256
+  int64 age_days = 5;
+  bool jailbreak_root = 6;
+  bool mock_location = 7;
+  string trust_state = 8;
+}
+
+message GpvSignal {
+  string transaction_id = 1;
+  string merchant_h3_r8 = 2;
+  string merchant_h3_r10 = 3;
+  string device_h3_r10 = 4;
+  double grid_distance_m = 5;
+  GpvOutcome outcome = 6;
+  double gps_accuracy_radius_m = 7;
+}
+
+message VerifyAttestationRequest {
+  DeviceIntegritySignal signal = 1;
+}
+
+message VerifyAttestationResponse {
+  string challenge_id = 1;
+  string nonce = 2;               // 128-bit, 90s expiry
+  int64 expires_at_unix_ms = 3;
+}
+
+message RecordGpvRequest {
+  GpvSignal signal = 1;
+}
+
+message RecordGpvResponse {
+  GpvSignal signal = 1;
+}
+
+service DeviceIntegrityService {
+  rpc VerifyAttestation(VerifyAttestationRequest) returns (VerifyAttestationResponse);
+  rpc RecordGpv(RecordGpvRequest) returns (RecordGpvResponse);
+}

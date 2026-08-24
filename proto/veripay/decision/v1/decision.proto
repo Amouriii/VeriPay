@@ -1,0 +1,35 @@
+// Cost-aware decision routing (PLAN §19).
+syntax = "proto3";
+
+package veripay.decision.v1;
+
+enum DecisionAction {
+  DECISION_ACTION_UNSPECIFIED = 0;
+  DECISION_ACTION_ALLOW = 1;
+  DECISION_ACTION_MONITOR = 2;
+  DECISION_ACTION_CHALLENGE = 3;
+  DECISION_ACTION_REVIEW = 4;
+  DECISION_ACTION_DECLINE = 5;
+  DECISION_ACTION_REVERSE = 6;
+}
+
+message DecideRequest {
+  string transaction_id = 1;
+  int32 risk_score = 2;
+  int64 potential_loss_minor = 3; // expected fraud loss ≈ P(fraud) × loss
+  double p_fraud = 4;
+  double investigation_cost = 5;
+  double auth_friction = 6;       // customer friction estimate
+  double churn_risk = 7;          // customer churn risk estimate
+}
+
+message DecideResponse {
+  string transaction_id = 1;
+  DecisionAction action = 2;
+  string rationale = 3;
+  optional string challenge_id = 4;
+}
+
+service DecisionEngineService {
+  rpc Decide(DecideRequest) returns (DecideResponse);
+}

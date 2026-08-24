@@ -1,4 +1,5 @@
 """Raw event sink: Kafka -> PostgreSQL / Iceberg audit (PLAN §22)."""
+
 from __future__ import annotations
 
 

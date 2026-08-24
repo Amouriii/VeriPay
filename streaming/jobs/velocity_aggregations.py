@@ -2,6 +2,7 @@
 
 Produces: tx_count_5m, tx_count_1h, tx_count_24h, spend_1h, spend_24h.
 """
+
 from __future__ import annotations
 
 

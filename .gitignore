@@ -14,3 +14,4 @@ web/dist/
 .vscode/
 .DS_Store
 proto/gen/
+.freebuff/

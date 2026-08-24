@@ -1,4 +1,5 @@
 """Tune risk-fusion component weights (PLAN §18)."""
+
 from __future__ import annotations
 
 

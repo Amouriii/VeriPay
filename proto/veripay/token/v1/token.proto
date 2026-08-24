@@ -1,0 +1,58 @@
+// Token vault & dCVV validation (PLAN §6.1, §22 — VirtualCardToken entity).
+syntax = "proto3";
+
+package veripay.token.v1;
+
+enum TokenType {
+  TOKEN_TYPE_UNSPECIFIED = 0;
+  TOKEN_TYPE_SINGLE_USE = 1;
+  TOKEN_TYPE_MERCHANT_LOCKED = 2;
+  TOKEN_TYPE_SUBSCRIPTION = 3;
+  TOKEN_TYPE_DYNAMIC_CVV = 4;
+}
+
+enum DcvvStatus {
+  DCVV_STATUS_UNSPECIFIED = 0;
+  DCVV_STATUS_MATCH = 1;
+  DCVV_STATUS_MISMATCH = 2;
+  DCVV_STATUS_EXPIRED = 3;
+  DCVV_STATUS_NOT_APPLICABLE = 4;
+}
+
+enum TokenStatus {
+  TOKEN_STATUS_UNSPECIFIED = 0;
+  TOKEN_STATUS_ACTIVE = 1;
+  TOKEN_STATUS_EXHAUSTED = 2;
+  TOKEN_STATUS_REVOKED = 3;
+}
+
+message VirtualCardToken {
+  string token_id = 1;
+  string user_id = 2;
+  string parent_funding_card_id = 3;
+  optional string merchant_lock_id = 4;
+  string dcvv_seed_key = 5;          // reference, not the secret itself
+  int32 dcvv_refresh_interval_sec = 6;
+  int64 usage_limit_amount = 7;
+  int64 expires_at_unix_ms = 8;
+  TokenStatus status = 9;
+  TokenType type = 10;
+}
+
+message DetokenizeRequest {
+  string vcn = 1;
+  string merchant_id = 2;
+  string submitted_dcvv = 3;
+  int64 now_unix_ms = 4;
+}
+
+message DetokenizeResponse {
+  VirtualCardToken token = 1;
+  string funding_pan_ref = 2;        // internal funding PAN reference
+  DcvvStatus dcvv_status = 3;
+  bool merchant_lock_ok = 4;
+}
+
+service TokenVaultService {
+  rpc Detokenize(DetokenizeRequest) returns (DetokenizeResponse);
+}

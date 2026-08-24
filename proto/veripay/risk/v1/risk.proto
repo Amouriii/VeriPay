@@ -1,0 +1,39 @@
+// Risk scores: component + fused (PLAN §7, §10, §11, §12, §18).
+syntax = "proto3";
+
+package veripay.risk.v1;
+
+enum RiskBand {
+  RISK_BAND_UNSPECIFIED = 0;
+  RISK_BAND_APPROVE = 1;      // 0-30
+  RISK_BAND_VERIFY = 2;       // 31-80
+  RISK_BAND_BLOCK = 3;        // 81-100
+}
+
+message ComponentScore {
+  string component = 1;    // "supervised" | "anomaly" | "graph" | "rules" | "device" | "gpv" | "financial" | "external"
+  int32 score = 2;         // 0-100
+  double weight = 3;       // contribution weight used in fusion
+  bool available = 4;      // false => weight redistributed (PLAN §18)
+  string reason_code = 5;  // e.g. DCVV_MISMATCH (PLAN §20)
+}
+
+message RiskScore {
+  string transaction_id = 1;
+  int32 unified_score = 2;        // 0-100
+  RiskBand band = 3;
+  repeated ComponentScore components = 4;
+}
+
+message FuseRequest {
+  string transaction_id = 1;
+  repeated ComponentScore components = 2;
+}
+
+message FuseResponse {
+  RiskScore score = 1;
+}
+
+service RiskFusionService {
+  rpc Fuse(FuseRequest) returns (FuseResponse);
+}
