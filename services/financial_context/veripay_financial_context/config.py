@@ -1,4 +1,5 @@
 """Service configuration (env-driven). PLAN §17."""
+
 from __future__ import annotations
 
 import os
@@ -14,7 +15,9 @@ class Settings:
     # Downstream service endpoints (gRPC). Filled in as services are wired.
     KAFKA_BOOTSTRAP: str = os.getenv("KAFKA_BOOTSTRAP", "localhost:9092")
     REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379")
-    POSTGRES_DSN: str = os.getenv("POSTGRES_DSN", "postgresql://veripay:veripay@localhost:5432/veripay")
+    POSTGRES_DSN: str = os.getenv(
+        "POSTGRES_DSN", "postgresql://veripay:veripay@localhost:5432/veripay"
+    )
 
 
 settings = Settings()

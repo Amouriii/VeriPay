@@ -30,3 +30,4 @@ disallow_untyped_defs = false  # stubs have untyped bodies
 [tool.pytest.ini_options]
 testpaths = ["libs", "services", "streaming", "ml"]
 asyncio_mode = "auto"
+addopts = "--import-mode=importlib"

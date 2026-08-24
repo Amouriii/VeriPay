@@ -1,10 +1,11 @@
 """Canonical thresholds and configuration constants (PLAN §7, §9, §14, §15)."""
+
 from __future__ import annotations
 
 # --- Risk bands (PLAN §7) ---
-RISK_SCORE_APPROVE_MAX = 30      # 0-30 => APPROVE
-RISK_SCORE_VERIFY_MAX = 80       # 31-80 => VERIFY/REVIEW
-RISK_SCORE_BLOCK_MAX = 100       # 81-100 => BLOCK/REVERSE
+RISK_SCORE_APPROVE_MAX = 30  # 0-30 => APPROVE
+RISK_SCORE_VERIFY_MAX = 80  # 31-80 => VERIFY/REVIEW
+RISK_SCORE_BLOCK_MAX = 100  # 81-100 => BLOCK/REVERSE
 
 # --- GPV distance classification (PLAN §14) ---
 GPV_MATCH_MAX_M = 100.0

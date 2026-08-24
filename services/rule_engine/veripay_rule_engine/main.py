@@ -1,4 +1,5 @@
 """FastAPI app factory + gRPC server entry. PLAN §13."""
+
 from __future__ import annotations
 
 from fastapi import FastAPI

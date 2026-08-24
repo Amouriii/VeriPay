@@ -1,4 +1,5 @@
 """Smoke test: the service package imports and the app boots."""
+
 from veripay_decision_engine.main import app, create_app
 
 

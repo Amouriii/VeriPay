@@ -2,6 +2,7 @@
 
 Produces: token_gen_1h, token_gen_24h, failed_dcvv_attempts, revoked_vcn_count_24h.
 """
+
 from __future__ import annotations
 
 

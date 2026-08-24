@@ -3,6 +3,7 @@
 Typed, lazy-imported clients so a service can depend on another's contract
 without coupling to its implementation. Generated stubs live in proto/gen/.
 """
+
 from __future__ import annotations
 
 
