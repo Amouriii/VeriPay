@@ -1,0 +1,10 @@
+# Default values. Per-service overrides live in values.<service>.yaml stubs.
+replicaCount: 1
+image: { repository: veripay, tag: latest, pullPolicy: IfNotPresent
+}
+service: { type: ClusterIP, port: 8000 }
+ingress: { enabled: false }
+resources: { limits: { cpu: "500m", memory: "512Mi" } }
+kafka: { bootstrap: "kafka:9092" }
+redis: { url: "redis://redis:6379" }
+postgres: { dsn: "postgresql://veripay:veripay@postgres:5432/veripay" }

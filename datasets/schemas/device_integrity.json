@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DeviceIntegritySignal",
+  "type": "object",
+  "required": ["device_id", "platform"],
+  "properties": {
+    "device_id": { "type": "string" },
+    "platform": { "enum": ["ios", "android"] },
+    "attestation_payload": { "type": "string" },
+    "public_key_pem": { "type": "string" },
+    "age_days": { "type": "integer" },
+    "jailbreak_root": { "type": "boolean" },
+    "mock_location": { "type": "boolean" },
+    "trust_state": { "enum": ["TRUSTED", "UNTRUSTED", "UNKNOWN"] }
+  }
+}

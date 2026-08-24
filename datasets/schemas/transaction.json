@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TransactionEvent",
+  "type": "object",
+  "required": ["transaction_id", "user_id", "mti", "channel", "amount_minor", "currency", "timestamp_unix_ms"],
+  "properties": {
+    "transaction_id": { "type": "string" },
+    "user_id": { "type": "string" },
+    "mti": { "enum": ["0100", "0110", "0400"] },
+    "channel": { "enum": ["CARD_PRESENT", "CARD_NOT_PRESENT"] },
+    "merchant_id": { "type": "string" },
+    "mcc": { "type": "string" },
+    "currency": { "type": "string" },
+    "amount_minor": { "type": "integer", "minimum": 0 },
+    "payment_instrument": { "type": "string" },
+    "timestamp_unix_ms": { "type": "integer" }
+  }
+}

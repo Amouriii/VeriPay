@@ -1,0 +1,22 @@
+[project]
+name = "veripay-external_context"
+version = "0.1.0"
+description = "External Context (§17) - Economic / seasonal / geographic normalization."
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.7",
+    "veripay-common",
+]
+
+[project.scripts]
+veripay-external_context = "app.main:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]

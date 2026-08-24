@@ -1,0 +1,10 @@
+[project]
+name = "veripay-common"
+version = "0.1.0"
+description = "Shared enums, constants, and types for VeriPay services (read-only contract surface)."
+requires-python = ">=3.11"
+dependencies = ["pydantic>=2.7"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.backends._legacy:_Backend"

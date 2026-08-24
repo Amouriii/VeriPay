@@ -1,0 +1,9 @@
+version: v2
+plugins:
+  - local: protoc-gen-python-pyproject
+    out: ../proto/gen/python
+  - local: ts
+    out: ../libs/veripay_ts/src/gen
+    opt: target=ts
+inputs:
+  - directory: veripay

@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GpvSignal",
+  "type": "object",
+  "properties": {
+    "transaction_id": { "type": "string" },
+    "merchant_h3_r8": { "type": "string" },
+    "merchant_h3_r10": { "type": "string" },
+    "device_h3_r10": { "type": "string" },
+    "grid_distance_m": { "type": "number" },
+    "outcome": { "enum": ["MATCHED", "LIKELY_MATCH", "MISMATCHED"] }
+  }
+}

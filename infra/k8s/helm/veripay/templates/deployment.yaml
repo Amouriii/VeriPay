@@ -1,0 +1,17 @@
+{{- range $name, $svc := .Values.services | default dict }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+spec:
+  replicas: {{ $.Values.replicaCount }}
+  selector: { matchLabels: { app: {{ $name }} } }
+  template:
+    metadata: { labels: { app: {{ $name }} } }
+    spec:
+      containers:
+        - name: {{ $name }}
+          image: "{{ $.Values.image.repository }}/{{ $name }}:{{ $.Values.image.tag }}"
+          ports: [{ containerPort: {{ $.Values.service.port }} }]
+{{- end }}

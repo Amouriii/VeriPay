@@ -1,0 +1,17 @@
+# VeriPay local dev stack. Each service is wired here for local development.
+# Per-service Dockerfiles live in services/<name>/Dockerfile.
+include:
+  - infra/compose/kafka.yml
+  - infra/compose/redis.yml
+  - infra/compose/postgres.yml
+  - infra/compose/services.yml
+
+services:
+  # Add dev-only helpers here (e.g., seed, migrate). Service runtimes are in
+  # infra/compose/services.yml so they can be toggled together.
+  migrate:
+    image: postgres:16-alpine
+    depends_on: [postgres]
+    volumes: ["./datasets/migrations:/migrations"]
+    entrypoint: ["sh", "-c", "psql $$DATABASE_URL -f /migrations/001_init.sql"]
+    env_file: [./infra/compose/.env]

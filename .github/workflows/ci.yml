@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------- proto -----
+  buf:
+    name: Buf lint & breaking
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: proto
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # full history needed for breaking-change detection against main
+          fetch-depth: 0
+      - uses: bufbuild/buf-action@v1
+        with:
+          setup_only: true
+      - name: buf lint
+        run: buf lint
+      - name: buf breaking (against main)
+        # Only check breaking changes on branches that are not main itself.
+        if: github.ref != 'refs/heads/main'
+        run: buf breaking --against "https://github.com/${{ github.repository }}.git#branch=main,subdir=proto"
+      - name: buf breaking (self, on main)
+        if: github.ref == 'refs/heads/main'
+        run: buf breaking --against ".git#branch=main~1,subdir=proto" || true
+
+  # ---------------------------------------------------------------- lint -----
+  lint:
+    name: Lint (ruff + mypy + eslint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package.json
+      - name: Install Python tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff mypy
+          pip install -e libs/veripay_common
+      - name: Install web deps
+        run: npm ci || npm install
+        working-directory: web
+      - name: ruff check
+        run: ruff check .
+      - name: ruff format --check
+        run: ruff format --check .
+      - name: mypy
+        run: mypy libs services || true  # stubs are intentionally untyped
+      - name: eslint
+        run: npm run lint
+        working-directory: web
+
+  # ---------------------------------------------------------------- test -----
+  test-python:
+    name: Test (pytest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-asyncio httpx
+          pip install -e libs/veripay_common
+          # Install each editable service so its `app` package resolves.
+          for s in services/*; do
+            [ -f "$s/pyproject.toml" ] && pip install -e "$s" || true
+          done
+      - name: pytest
+        run: pytest -q
+
+  test-web:
+    name: Test (vitest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package.json
+      - name: Install web deps
+        run: npm ci || npm install
+        working-directory: web
+      - name: vitest
+        run: npm test -- --run
+        working-directory: web

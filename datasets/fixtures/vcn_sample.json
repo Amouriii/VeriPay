@@ -1,0 +1,14 @@
+[
+  {
+    "token_id": "vcn_abc123",
+    "user_id": "u_100",
+    "parent_funding_card_id": "pan_zzz",
+    "merchant_lock_id": "m_amazon",
+    "dcvv_seed_key": "seed_ref_1",
+    "dcvv_refresh_interval_sec": 300,
+    "usage_limit_amount": 5000,
+    "expires_at": "2026-12-31T00:00:00Z",
+    "status": "ACTIVE",
+    "type": "MERCHANT_LOCKED"
+  }
+]

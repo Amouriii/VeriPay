@@ -1,0 +1,14 @@
+[
+  {
+    "transaction_id": "tx_0001",
+    "user_id": "u_100",
+    "mti": "0100",
+    "channel": "CARD_NOT_PRESENT",
+    "merchant_id": "m_amazon",
+    "mcc": "5712",
+    "currency": "USD",
+    "amount_minor": 4999,
+    "payment_instrument": "vcn_abc123",
+    "timestamp_unix_ms": 1700000000000
+  }
+]
