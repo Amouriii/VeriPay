@@ -13,7 +13,7 @@ enum DecisionAction {
   DECISION_ACTION_REVERSE = 6;
 }
 
-message DecisionRequest {
+message DecideRequest {
   string transaction_id = 1;
   int32 risk_score = 2;
   int64 potential_loss_minor = 3; // expected fraud loss ≈ P(fraud) × loss
@@ -23,7 +23,7 @@ message DecisionRequest {
   double churn_risk = 7;          // customer churn risk estimate
 }
 
-message DecisionResponse {
+message DecideResponse {
   string transaction_id = 1;
   DecisionAction action = 2;
   string rationale = 3;
@@ -31,5 +31,5 @@ message DecisionResponse {
 }
 
 service DecisionEngineService {
-  rpc Decide(DecisionRequest) returns (DecisionResponse);
+  rpc Decide(DecideRequest) returns (DecideResponse);
 }

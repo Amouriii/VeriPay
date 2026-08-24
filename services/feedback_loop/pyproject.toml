@@ -11,7 +11,7 @@ dependencies = [
 ]
 
 [project.scripts]
-veripay-feedback_loop = "app.main:main"
+veripay-feedback_loop = "veripay_feedback_loop.main:main"
 
 [build-system]
 requires = ["setuptools>=68"]
@@ -19,4 +19,4 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["app*"]
+include = ["veripay_feedback_loop*"]

@@ -1,5 +1,5 @@
 """Smoke test: the service package imports and the app boots."""
-from app.main import app, create_app
+from veripay_feature_store.main import app, create_app
 
 
 def test_app_factory() -> None:

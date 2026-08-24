@@ -11,7 +11,7 @@ dependencies = [
 ]
 
 [project.scripts]
-veripay-supervised_model = "app.main:main"
+veripay-supervised_model = "veripay_supervised_model.main:main"
 
 [build-system]
 requires = ["setuptools>=68"]
@@ -19,4 +19,4 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["app*"]
+include = ["veripay_supervised_model*"]

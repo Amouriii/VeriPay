@@ -11,7 +11,7 @@ dependencies = [
 ]
 
 [project.scripts]
-veripay-audit_store = "app.main:main"
+veripay-audit_store = "veripay_audit_store.main:main"
 
 [build-system]
 requires = ["setuptools>=68"]
@@ -19,4 +19,4 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["app*"]
+include = ["veripay_audit_store*"]

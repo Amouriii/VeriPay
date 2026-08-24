@@ -11,7 +11,7 @@ dependencies = [
 ]
 
 [project.scripts]
-veripay-device_integrity = "app.main:main"
+veripay-device_integrity = "veripay_device_integrity.main:main"
 
 [build-system]
 requires = ["setuptools>=68"]
@@ -19,4 +19,4 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["app*"]
+include = ["veripay_device_integrity*"]

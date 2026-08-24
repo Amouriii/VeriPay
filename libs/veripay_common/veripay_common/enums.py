@@ -6,11 +6,7 @@ ergonomic Python mirror used inside services.
 """
 from __future__ import annotations
 
-from enum import Enum
-
-
-class StrEnum(str, Enum):
-    """A string enum that serializes to its value."""
+from enum import StrEnum
 
 
 class Mti(StrEnum):
