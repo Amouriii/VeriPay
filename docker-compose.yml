@@ -12,6 +12,22 @@ services:
   migrate:
     image: postgres:16-alpine
     depends_on: [postgres]
-    volumes: ["./datasets/migrations:/migrations"]
-    entrypoint: ["sh", "-c", "psql $$DATABASE_URL -f /migrations/001_init.sql"]
-    env_file: [./infra/compose/.env]
+    volumes: ["./datasets/migrations:/migrations:ro"]
+    environment:
+      PGUSER: veripay
+      PGPASSWORD: veripay
+      PGHOST: postgres
+      PGPORT: "5432"
+    entrypoint:
+      - sh
+      - -c
+      - >-
+        until pg_isready -d veripay_customer_db; do sleep 1; done;
+        for database in veripay_bank_db veripay_fraud_ops_db veripay_merchant_db veripay_mobile_db; do
+          createdb -T template0 "$$database" 2>/dev/null || true;
+        done;
+        psql -d veripay_customer_db -f /migrations/customer/001_customer.sql;
+        psql -d veripay_bank_db -f /migrations/bank/001_bank.sql;
+        psql -d veripay_fraud_ops_db -f /migrations/fraud_ops/001_fraud_operations.sql;
+        psql -d veripay_merchant_db -f /migrations/merchant/001_merchant.sql;
+        psql -d veripay_mobile_db -f /migrations/mobile/001_mobile.sql
