@@ -35,7 +35,7 @@ def test_create_is_idempotent_and_normalizes_currency() -> None:
     duplicate = service.create(_case())
     assert first == duplicate
     assert first.currency == "USD"
-    assert len(repository.list()) == 1
+    assert len(repository.list_cases()) == 1
 
 
 def test_lifecycle_accepts_valid_transition_and_rejects_invalid_transition() -> None:

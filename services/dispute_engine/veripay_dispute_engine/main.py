@@ -37,7 +37,7 @@ def create_app(service: DisputeService | None = None) -> FastAPI:
         status_filter: DisputeStatus | None = None,
         reason: DisputeReason | None = None,
     ) -> list[DisputeCase]:
-        cases = dispute_service.repository.list()
+        cases = dispute_service.repository.list_cases()
         if status_filter is not None:
             cases = [case for case in cases if case.status == status_filter]
         if reason is not None:

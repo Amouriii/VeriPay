@@ -77,7 +77,7 @@ class DisputeRepository(Protocol):
 
     def get(self, dispute_id: str) -> DisputeCase | None: ...
 
-    def list(self) -> list[DisputeCase]: ...
+    def list_cases(self) -> list[DisputeCase]: ...
 
     def save(self, case: DisputeCase) -> DisputeCase: ...
 
@@ -107,7 +107,7 @@ class InMemoryDisputeRepository:
     def get(self, dispute_id: str) -> DisputeCase | None:
         return self.cases.get(dispute_id)
 
-    def list(self) -> list[DisputeCase]:
+    def list_cases(self) -> list[DisputeCase]:
         return list(self.cases.values())
 
     def save(self, case: DisputeCase) -> DisputeCase:
@@ -179,7 +179,7 @@ class DisputeService:
         status: DisputeStatus | None = None,
         reason: DisputeReason | None = None,
     ) -> DisputeReport:
-        cases = self.repository.list()
+        cases = self.repository.list_cases()
         if status is not None:
             cases = [case for case in cases if case.status == status]
         if reason is not None:

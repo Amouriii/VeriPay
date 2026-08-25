@@ -228,6 +228,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Prepare local Compose environment
+        run: touch infra/compose/.env
       - name: Validate dependency stack
         run: docker compose -f infra/compose/docker-compose.dev.yml config --quiet
       - name: Validate backend service stack
