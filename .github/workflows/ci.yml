@@ -21,7 +21,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # full history needed for breaking-change detection against main
           fetch-depth: 0
       - uses: bufbuild/buf-action@v1
         with:
@@ -65,6 +64,63 @@ jobs:
         run: npm run lint
         working-directory: web
 
+  # ----------------------------------------------------------- ingress -----
+  ingress:
+    name: Ingress contract tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install ingress dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e libs/veripay_common
+          pip install -e services/ingress
+          pip install pytest httpx
+      - name: Run ingress tests
+        run: pytest -q services/ingress/tests
+
+  # -------------------------------------------------------- token-vault -----
+  token-vault:
+    name: Token vault contract tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install token vault dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e libs/veripay_common
+          pip install -e services/token_vault
+          pip install pytest httpx
+      - name: Run token vault tests
+        run: pytest -q services/token_vault/tests
+
+  # --------------------------------------------------------- audit-store -----
+  audit-store:
+    name: Audit store contract tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install audit store dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e libs/veripay_common
+          pip install -e services/audit_store
+          pip install pytest httpx
+      - name: Run audit store tests
+        run: pytest -q services/audit_store/tests
+
   # ---------------------------------------------------------------- test -----
   test-python:
     name: Test (pytest)
@@ -81,7 +137,6 @@ jobs:
           pip install pytest pytest-asyncio httpx
           pip install -e libs/veripay_common
           pip install -e ml --no-deps
-          # Install each editable service so its package resolves.
           for s in services/*; do
             [ -f "$s/pyproject.toml" ] && pip install -e "$s" || true
           done
