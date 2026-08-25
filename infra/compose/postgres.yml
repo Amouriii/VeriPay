@@ -2,7 +2,10 @@ services:
   postgres:
     image: postgres:16-alpine
     ports: ["5432:5432"]
-    env_file: [.env]
+    environment:
+      POSTGRES_USER: veripay
+      POSTGRES_PASSWORD: veripay
+      POSTGRES_DB: customer_db
     volumes: ["pgdata:/var/lib/postgresql/data"]
 volumes:
   pgdata:
