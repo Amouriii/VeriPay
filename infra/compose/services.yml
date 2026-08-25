@@ -1,105 +1,110 @@
 # All VeriPay backend services. Toggle by commenting out as needed during dev.
 # Each service image is built from services/<name>/Dockerfile.
+include:
+  - kafka.yml
+  - redis.yml
+  - postgres.yml
+
 services:
   ingress:
-    build: ../services/ingress
+    build: ../../services/ingress
     ports: ["8001:8000"]
     env_file: [.env]
     depends_on: [kafka, postgres]
   token_vault:
-    build: ../services/token_vault
+    build: ../../services/token_vault
     ports: ["8002:8000"]
     env_file: [.env]
   audit_store:
-    build: ../services/audit_store
+    build: ../../services/audit_store
     ports: ["8003:8000"]
     env_file: [.env]
     depends_on: [postgres]
   feature_store:
-    build: ../services/feature_store
+    build: ../../services/feature_store
     ports: ["8004:8000"]
     env_file: [.env]
     depends_on: [redis]
   rule_engine:
-    build: ../services/rule_engine
+    build: ../../services/rule_engine
     ports: ["8005:8000"]
     env_file: [.env]
   supervised_model:
-    build: ../services/supervised_model
+    build: ../../services/supervised_model
     ports: ["8006:8000"]
     env_file: [.env]
   anomaly_model:
-    build: ../services/anomaly_model
+    build: ../../services/anomaly_model
     ports: ["8007:8000"]
     env_file: [.env]
   graph_engine:
-    build: ../services/graph_engine
+    build: ../../services/graph_engine
     ports: ["8008:8000"]
     env_file: [.env]
   financial_context:
-    build: ../services/financial_context
+    build: ../../services/financial_context
     ports: ["8009:8000"]
     env_file: [.env]
   external_context:
-    build: ../services/external_context
+    build: ../../services/external_context
     ports: ["8010:8000"]
     env_file: [.env]
   device_integrity:
-    build: ../services/device_integrity
+    build: ../../services/device_integrity
     ports: ["8011:8000"]
     env_file: [.env]
   risk_fusion:
-    build: ../services/risk_fusion
+    build: ../../services/risk_fusion
     ports: ["8012:8000"]
     env_file: [.env]
   decision_engine:
-    build: ../services/decision_engine
+    build: ../../services/decision_engine
     ports: ["8013:8000"]
     env_file: [.env]
   investigation_agent:
-    build: ../services/investigation_agent
+    build: ../../services/investigation_agent
     ports: ["8014:8000"]
     env_file: [.env]
   auth_orchestration:
-    build: ../services/auth_orchestration
+    build: ../../services/auth_orchestration
     ports: ["8015:8000"]
     env_file: [.env]
   feedback_loop:
-    build: ../services/feedback_loop
+    build: ../../services/feedback_loop
     ports: ["8016:8000"]
     env_file: [.env]
   # --- Expansion: Banking/FI + Business/Merchant services ---
   banking_gateway:
-    build: ../services/banking_gateway
+    build: ../../services/banking_gateway
     ports: ["8017:8000"]
     env_file: [.env]
     depends_on: [kafka, postgres]
   merchant_ingress:
-    build: ../services/merchant_ingress
+    build: ../../services/merchant_ingress
     ports: ["8018:8000"]
     env_file: [.env]
   merchant_policy:
-    build: ../services/merchant_policy
+    build: ../../services/merchant_policy
     ports: ["8019:8000"]
     env_file: [.env]
   dispute_engine:
-    build: ../services/dispute_engine
+    build: ../../services/dispute_engine
     ports: ["8020:8000"]
     env_file: [.env]
     depends_on: [postgres]
   compliance_engine:
-    build: ../services/compliance_engine
+    build: ../../services/compliance_engine
     ports: ["8021:8000"]
     env_file: [.env]
   fi_ops_portal:
-    build: ../services/fi_ops_portal
+    build: ../../services/fi_ops_portal
     ports: ["8022:8000"]
     env_file: [.env]
   business_portal:
-    build: ../services/business_portal
+    build: ../../services/business_portal
     ports: ["8023:8000"]
     env_file: [.env]
   corporate_spend:
-    build: ../services/corporate_spend
+    build: ../../services/corporate_spend
     ports: ["8024:8000"]
     env_file: [.env]
