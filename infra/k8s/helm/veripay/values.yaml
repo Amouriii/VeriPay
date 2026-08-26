@@ -8,3 +8,18 @@ resources: { limits: { cpu: "500m", memory: "512Mi" } }
 kafka: { bootstrap: "kafka:9092" }
 redis: { url: "redis://redis:6379" }
 postgres: { dsn: "postgresql://veripay:veripay@postgres:5432/veripay" }
+llmInference:
+  enabled: false
+  replicaCount: 1
+  image: vllm/vllm-openai:latest
+  port: 8000
+  nodeSelector: { accelerator: nvidia-gpu }
+  args: ["--model", "local-model", "--host", "0.0.0.0"]
+  resources:
+    limits: { nvidia.com/gpu: 1, cpu: "4", memory: "16Gi" }
+    requests: { nvidia.com/gpu: 1, cpu: "2", memory: "8Gi" }
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 4
+    targetCPUUtilizationPercentage: 70

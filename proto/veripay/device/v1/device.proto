@@ -19,6 +19,11 @@ message DeviceIntegritySignal {
   bool jailbreak_root = 6;
   bool mock_location = 7;
   string trust_state = 8;
+  bool screen_recording = 9;
+  bool debugger_attached = 10;
+  bool sim_swap_risk = 11;
+  bool telemetry_available = 12;
+  string telemetry_envelope_ref = 13;
 }
 
 message GpvSignal {
@@ -37,8 +42,10 @@ message VerifyAttestationRequest {
 
 message VerifyAttestationResponse {
   string challenge_id = 1;
-  string nonce = 2;               // 128-bit, 90s expiry
+  string nonce = 2;               // 128-bit attestation nonce, 90s expiry
   int64 expires_at_unix_ms = 3;
+  string verification_token = 4; // signed authorization token, 10-30s expiry
+  int64 verification_expires_at_unix_ms = 5;
 }
 
 message RecordGpvRequest {
