@@ -8,6 +8,7 @@ __pycache__/
 dist/
 build/
 .build/
+mobile/ios/.build/
 *.egg-info/
 node_modules/
 web/dist/
