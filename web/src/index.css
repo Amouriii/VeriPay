@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --base-deep-obsidian: #0b131f;
+  --polar-white: #fafafc;
+  --cool-gray-surface: #f0f3f7;
+  --muted-charcoal: #333a48;
+  --customer-indigo: #4f46e5;
+  --business-steel-blue: #0284c7;
+}
+
+body {
+  background: var(--polar-white);
+  color: var(--muted-charcoal);
+}
+
+@layer components {
+  .app-shell {
+    background: var(--polar-white);
+    color: var(--muted-charcoal);
+  }
+
+  .ops-header {
+    background: var(--base-deep-obsidian);
+    color: var(--polar-white);
+  }
+}

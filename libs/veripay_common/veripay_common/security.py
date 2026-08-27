@@ -71,14 +71,10 @@ class HmacVerificationTokenSigner:
         if not VERIFICATION_TOKEN_MIN_TTL_SEC <= ttl_seconds <= VERIFICATION_TOKEN_MAX_TTL_SEC:
             raise ValueError("Verification token TTL must be between 10 and 30 seconds")
         issued_at = (
-            claims.issued_at
-            if claims.issued_at.tzinfo
-            else claims.issued_at.replace(tzinfo=UTC)
+            claims.issued_at if claims.issued_at.tzinfo else claims.issued_at.replace(tzinfo=UTC)
         )
         expires_at = issued_at.replace() + timedelta(seconds=ttl_seconds)
-        body_claims = claims.model_copy(
-            update={"issued_at": issued_at, "expires_at": expires_at}
-        )
+        body_claims = claims.model_copy(update={"issued_at": issued_at, "expires_at": expires_at})
         body = json.dumps(
             body_claims.model_dump(mode="json"),
             sort_keys=True,

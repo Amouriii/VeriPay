@@ -59,8 +59,7 @@ class DeterministicPiiRedactor:
             return result
         if isinstance(value, (list, tuple)):
             return [
-                self._walk(child, f"{path}[{index}]", redacted)
-                for index, child in enumerate(value)
+                self._walk(child, f"{path}[{index}]", redacted) for index, child in enumerate(value)
             ]
         return value
 

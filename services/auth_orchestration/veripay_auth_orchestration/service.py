@@ -330,8 +330,7 @@ class VerificationService:
             and session.outcome != VerificationOutcome.APPROVED
         )
         session.escalation_required = (
-            session.risk_tier == RiskTier.HIGH
-            and session.outcome != VerificationOutcome.APPROVED
+            session.risk_tier == RiskTier.HIGH and session.outcome != VerificationOutcome.APPROVED
         )
         self.repository.save(session)
         return VerificationResult(
@@ -359,8 +358,7 @@ class VerificationService:
 
     def _token_for_expiration(self, session: VerificationSession) -> str:
         raise ValueError(
-            "Expiration requires the original token; tokens are never recoverable "
-            "from storage"
+            "Expiration requires the original token; tokens are never recoverable from storage"
         )
 
 

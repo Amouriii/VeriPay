@@ -176,9 +176,8 @@ def decide(request: DecisionRequest) -> DecisionResponse:
     assert request.risk_tier is not None
     path = _derived_path(request)
     request.processing_path = path
-    matrix_mode = (
-        request.risk_band is None
-        or request.risk_tier != tier_from_band(request.risk_band)
+    matrix_mode = request.risk_band is None or request.risk_tier != tier_from_band(
+        request.risk_band
     )
     explanation_mode = (
         ExplanationMode.ASYNC if path == ProcessingPath.FAST else ExplanationMode.IN_BAND
