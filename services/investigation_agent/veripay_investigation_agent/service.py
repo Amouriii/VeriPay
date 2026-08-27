@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
-from typing import Protocol
+from typing import Protocol, cast
 
 from pydantic import BaseModel, Field
 from veripay_common.privacy import DeterministicPiiRedactor, PiiRedactor
@@ -38,7 +38,7 @@ class DeterministicLocalLlmProvider:
     def explain(self, context: dict[str, object]) -> str:
         score = context["risk_score"]
         baseline = context["baseline_30d"]
-        macro = context["macro_context"]
+        macro = cast(dict[str, object], context["macro_context"])
         return (
             f"Risk score {score}/100; 30-day baseline contains {baseline} "
             f"transactions; macro context fields: {len(macro)}."
@@ -74,11 +74,11 @@ def evaluate(
     if current.tzinfo is None:
         current = current.replace(tzinfo=UTC)
     cutoff = current - timedelta(days=30)
-    history = [
-        event
-        for event in request.transaction_history
-        if _event_time(event) is None or _event_time(event) >= cutoff
-    ]
+    history: list[dict[str, object]] = []
+    for event in request.transaction_history:
+        occurred_at = _event_time(event)
+        if occurred_at is None or occurred_at >= cutoff:
+            history.append(event)
     redacted_transaction = redactor.redact(request.transaction).payload
     context = {
         "transaction": redacted_transaction,
