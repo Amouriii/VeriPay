@@ -3,6 +3,37 @@
 See `PLAN.md` (sections 4–24) for the authoritative design. This document maps
 each diagrammed box to its scaffold location and PLAN section.
 
+## Database boundaries
+
+VeriPay has five logical PostgreSQL databases. Fraud Operations has its own
+database because it is an analyst-facing application with an independent
+investigation and alert lifecycle:
+
+| Database | Domain data |
+|---|---|
+| `veripay_customer_db` | Users, customers, accounts, devices, VCNs, transactions, security events |
+| `veripay_bank_db` | Bank users, fraud and risk statistics, policies, model versions, disputes, audit logs, and settlement |
+| `veripay_fraud_ops_db` | Fraud transactions, risk assessments and factors, alerts, investigations, and analyst actions |
+| `veripay_merchant_db` | Merchants, merchant users, transactions, rules, limits, and disputes |
+| `veripay_mobile_db` | Mobile users, registered devices, device security, verification, push tokens, and mobile audit logs |
+
+Cross-database references are stored as stable IDs and validated by the owning
+service. They intentionally do not use SQL foreign keys across databases.
+
+Database migrations live under `datasets/migrations/` and are applied by the
+Compose `migrate` service.
+
+Services that persist relational data must set `POSTGRES_DSN` to the database
+they own. The local host DSNs are:
+
+| Service group | DSN database |
+|---|---|
+| Customer-facing ingress, token vault, and customer state | `veripay_customer_db` |
+| Banking gateway, audit store, bank reporting, disputes, and settlement | `veripay_bank_db` |
+| Fraud Operations portal, risk assessments, alerts, investigations, and analyst workflows | `veripay_fraud_ops_db` |
+| Merchant ingress, merchant policy, corporate spend, and business portal | `veripay_merchant_db` |
+| Device integrity and mobile authentication | `veripay_mobile_db` |
+
 | Component | Location | PLAN |
 |---|---|---|
 | Ingress (ISO 8583 / REST / gRPC) | `services/ingress` | §5, §6.1 |

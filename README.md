@@ -19,6 +19,24 @@ VeriPay/
 └─ docs/              ADRs, architecture, contributing, runbooks
 ```
 
+## Databases
+
+The platform uses five logical PostgreSQL databases:
+
+| Database | Owns |
+|---|---|
+| `veripay_customer_db` | Users, customers, accounts, devices, funding cards, VCNs, transactions, security events |
+| `veripay_bank_db` | Bank users, fraud and risk statistics, disputes, audit logs, settlement, policies, and model versions |
+| `veripay_fraud_ops_db` | Fraud transactions, risk assessments, risk factors, fraud alerts, investigations, and analyst actions |
+| `veripay_merchant_db` | Merchants, merchant users, merchant transactions, rules, limits, and disputes |
+| `veripay_mobile_db` | Mobile users, registered devices, device security, verification requests and attempts, push tokens, and mobile audit logs |
+
+Fraud Operations has its own database because it has a separate analyst-facing
+workload and lifecycle. Relationships between databases use stable IDs and service/API
+contracts rather than PostgreSQL foreign keys, since PostgreSQL cannot enforce
+foreign keys across databases. The migrations are in
+`datasets/migrations/{customer,bank,fraud_ops,merchant,mobile}`.
+
 ## Quickstart
 ```bash
 make install      # python + js deps
@@ -26,6 +44,32 @@ make up           # docker compose (Kafka, Redis, Postgres, all services)
 make test         # pytest + vitest
 make lint         # ruff + mypy + eslint
 ```
+
+The local PostgreSQL server listens on `localhost:5432`. Compose creates and
+migrates `veripay_customer_db`, `veripay_bank_db`, `veripay_fraud_ops_db`, `veripay_merchant_db`, and `veripay_mobile_db`; service
+connections should select the appropriate database in `POSTGRES_DSN`.
+
+For an existing local PostgreSQL installation, run the domain migrations with
+PowerShell. The script defaults to the `veripay_*_db` names:
+
+```powershell
+.\scripts\migrate-local.ps1
+```
+
+If your databases use the Compose names instead, pass them explicitly:
+
+```powershell
+.\scripts\migrate-local.ps1 `
+	-CustomerDatabase customer_db `
+	-BankDatabase bank_db `
+	-FraudOperationsDatabase fraud_ops_db `
+	-MerchantDatabase merchant_db `
+	-MobileDatabase mobile_db
+```
+
+The script invokes `psql -f` once per database. It does not run the legacy
+combined files `datasets/migrations/001_init.sql` or
+`datasets/migrations/002_banking_business.sql`.
 
 ## Parallel development
 Each work-tree owns **one** directory (a service, `streaming/`, `web/`, etc.).
