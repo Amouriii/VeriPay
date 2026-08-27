@@ -38,10 +38,10 @@ export const notifications = [
 ];
 
 export const customers = [
-  { id: 'CUS-18492', name: 'Customer #18492', email: 'c•••••@example.com', transactions: 148, volume: '$18,420', alerts: 3, risk: 'HIGH', account: 'ACTIVE' },
-  { id: 'CUS-77104', name: 'Customer #77104', email: 'j•••••@example.com', transactions: 62, volume: '$7,890', alerts: 1, risk: 'MEDIUM', account: 'ACTIVE' },
-  { id: 'CUS-40211', name: 'Customer #40211', email: 'm•••••@example.com', transactions: 231, volume: '$32,104', alerts: 0, risk: 'LOW', account: 'ACTIVE' },
-  { id: 'CUS-99518', name: 'Customer #99518', email: 'a•••••@example.com', transactions: 89, volume: '$14,201', alerts: 2, risk: 'MEDIUM', account: 'REVIEW' },
+  { id: 'CUS-18492', name: 'Customer #18492', email: 'c•••••@example.com', cardLast4: '4521', transactions: 148, volume: '$18,420', alerts: 3, risk: 'HIGH', account: 'ACTIVE' },
+  { id: 'CUS-77104', name: 'Customer #77104', email: 'j•••••@example.com', cardLast4: '0837', transactions: 62, volume: '$7,890', alerts: 1, risk: 'MEDIUM', account: 'ACTIVE' },
+  { id: 'CUS-40211', name: 'Customer #40211', email: 'm•••••@example.com', cardLast4: '6310', transactions: 231, volume: '$32,104', alerts: 0, risk: 'LOW', account: 'ACTIVE' },
+  { id: 'CUS-99518', name: 'Customer #99518', email: 'a•••••@example.com', cardLast4: '1198', transactions: 89, volume: '$14,201', alerts: 2, risk: 'MEDIUM', account: 'REVIEW' },
 ];
 
 export const merchants = [
