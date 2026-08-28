@@ -197,7 +197,7 @@ export function BankCustomerProfile() {
               </h2>
 
               <p className="mt-0.5 text-xs text-slate-500">
-                Recent activity used to compare against the customer's normal behavior.
+                Recent activity used to compare against the customer&apos;s normal behavior.
               </p>
             </div>
           </div>
@@ -311,29 +311,6 @@ function Behavior({
 /* ================================================= */
 /* Risk badge */
 /* ================================================= */
-
-function RiskBadge({
-  level,
-}: {
-  level: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-}) {
-  const styles =
-    level === 'CRITICAL'
-      ? 'bg-red-600 text-white'
-      : level === 'HIGH'
-      ? 'bg-orange-100 text-orange-800'
-      : level === 'MEDIUM'
-      ? 'bg-amber-100 text-amber-800'
-      : 'bg-emerald-100 text-emerald-800';
-
-  return (
-    <span
-      className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${styles}`}
-    >
-      {level}
-    </span>
-  );
-}
 
 /* ================================================= */
 /* Icons */

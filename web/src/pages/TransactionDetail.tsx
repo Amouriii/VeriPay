@@ -171,7 +171,7 @@ export function TransactionDetail() {
             </h2>
 
             <p className="mt-1 text-sm text-slate-600">
-              Specific differences from the customer's normal behavior.
+              Specific differences from the customer&apos;s normal behavior.
             </p>
           </div>
         </div>
