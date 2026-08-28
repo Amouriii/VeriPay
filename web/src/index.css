@@ -1,3 +1,278 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* ================================================================
+       VERIPAY CORE PALETTE
+       ================================================================ */
+
+    --vp-navy: #102a43;
+    --vp-navy-dark: #0b1f33;
+
+    --vp-indigo: #29265f;
+    --vp-indigo-dark: #201b4b;
+    --vp-indigo-light: #eeeaff;
+
+    --vp-teal: #087f7a;
+    --vp-teal-dark: #05635f;
+    --vp-teal-bright: #0a9f98;
+    --vp-teal-light: #e7f7f5;
+
+    --vp-cyan: #43cddd;
+    --vp-cyan-light: #e8f9fc;
+
+    --vp-blue: #5268d8;
+    --vp-blue-light: #dceaff;
+
+    --vp-green: #087a5e;
+    --vp-green-light: #ecfdf5;
+
+    --vp-orange: #c56a00;
+    --vp-orange-bright: #f59e0b;
+    --vp-orange-light: #fff7e6;
+
+    --vp-red: #c0392b;
+    --vp-red-bright: #ef4444;
+    --vp-red-dark: #a93226;
+    --vp-red-light: #fff1ef;
+
+    --vp-purple: #7566c9;
+    --vp-purple-light: #e9e5ff;
+
+    /* ================================================================
+       CUSTOMER SURFACES
+       ================================================================ */
+
+    --vp-bg: #dcecff;
+    --vp-bg-customer: #dcecff;
+    --vp-bg-bank: #eef1f7;
+
+    --vp-surface: #edf4ff;
+    --vp-surface-soft: #e5efff;
+    --vp-surface-teal: #e0f5f4;
+    --vp-surface-blue: #e1ecff;
+    --vp-surface-purple: #ebe7ff;
+
+    /* ================================================================
+       BORDERS
+       ================================================================ */
+
+    --vp-border: #bfd0ea;
+    --vp-border-strong: #aebfdd;
+
+    --vp-border-red: #f0c8c2;
+    --vp-border-orange: #f0d49d;
+    --vp-border-green: #bfe3d5;
+    --vp-border-blue: #bfd1f2;
+    --vp-border-purple: #ccc4ed;
+
+    /* ================================================================
+       TEXT
+       ================================================================ */
+
+    --vp-text: #17324d;
+    --vp-text-soft: #536b8d;
+    --vp-muted: #647a99;
+    --vp-subtle: #8192aa;
+
+    /* ================================================================
+       SHADOWS
+       ================================================================ */
+
+    --vp-shadow-sm: 0 1px 2px rgba(23, 50, 77, 0.06);
+    --vp-shadow-md: 0 8px 24px rgba(23, 50, 77, 0.1);
+  }
+
+  html {
+    background: var(--vp-bg);
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    background: var(--vp-bg);
+    color: var(--vp-text);
+    font-family:
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  ::selection {
+    background: #cbdcff;
+    color: #17324d;
+  }
+}
+
+@layer components {
+
+  /* ================================================================
+     GENERAL CARDS
+     ================================================================ */
+
+  .vp-card {
+    @apply rounded-xl border;
+    border-color: var(--vp-border);
+
+    background: linear-gradient(
+      135deg,
+      #edf4ff 0%,
+      #e8efff 55%,
+      #ebe7ff 100%
+    );
+
+    box-shadow: var(--vp-shadow-sm);
+  }
+
+  .vp-card-compact {
+    @apply rounded-xl border;
+    border-color: var(--vp-border);
+
+    background: linear-gradient(
+      135deg,
+      #edf4ff 0%,
+      #e6f0ff 55%,
+      #e2f4f4 100%
+    );
+
+    box-shadow: var(--vp-shadow-sm);
+  }
+
+  .vp-card-hover {
+    @apply transition;
+  }
+
+  .vp-card-hover:hover {
+    box-shadow: var(--vp-shadow-md);
+    transform: translateY(-1px);
+  }
+
+  /* ================================================================
+     SECTION LABELS
+     ================================================================ */
+
+  .vp-section-label {
+    @apply text-[10px] font-black uppercase tracking-[0.18em];
+    color: var(--vp-teal);
+  }
+
+  .vp-bank-section-label {
+    @apply text-[10px] font-black uppercase tracking-[0.18em];
+    color: #5145a6;
+  }
+
+  /* ================================================================
+     CUSTOMER STATES
+     ================================================================ */
+
+  .vp-status-critical {
+    @apply rounded-xl border;
+    border-color: var(--vp-border-red);
+    background: var(--vp-red-light);
+    color: var(--vp-red);
+  }
+
+  .vp-status-warning {
+    @apply rounded-xl border;
+    border-color: var(--vp-border-orange);
+    background: var(--vp-orange-light);
+    color: var(--vp-orange);
+  }
+
+  .vp-status-success {
+    @apply rounded-xl border;
+    border-color: var(--vp-border-green);
+    background: var(--vp-green-light);
+    color: var(--vp-green);
+  }
+
+  .vp-status-info {
+    @apply rounded-xl border;
+    border-color: var(--vp-border-blue);
+    background: var(--vp-blue-light);
+    color: var(--vp-blue);
+  }
+
+  /* ================================================================
+     BANK CONSOLE STATES
+     ================================================================ */
+
+  .vp-bank-critical {
+    @apply border-l-4 border-red-500 bg-red-50;
+  }
+
+  .vp-bank-high {
+    @apply border-l-4 border-orange-400 bg-orange-50;
+  }
+
+  .vp-bank-medium {
+    @apply border-l-4 border-amber-400 bg-amber-50;
+  }
+
+  .vp-bank-normal {
+    @apply border-l-4 border-teal-500 bg-teal-50;
+  }
+
+  /* ================================================================
+     SMALL METRIC CARDS
+     ================================================================ */
+
+  .vp-metric {
+    @apply rounded-xl border px-4 py-3;
+    border-color: var(--vp-border);
+
+    background: linear-gradient(
+      135deg,
+      #edf4ff,
+      #e9e7ff
+    );
+
+    box-shadow: var(--vp-shadow-sm);
+  }
+
+  /* ================================================================
+     SCROLLBARS
+     ================================================================ */
+
+  .vp-scrollbar::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+  }
+
+  .vp-scrollbar::-webkit-scrollbar-track {
+    background: #d5e3fa;
+  }
+
+  .vp-scrollbar::-webkit-scrollbar-thumb {
+    background: #aebfdd;
+    border-radius: 999px;
+  }
+
+  .vp-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #8fa5c8;
+  }
+}
