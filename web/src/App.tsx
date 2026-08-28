@@ -41,6 +41,8 @@ import { TransactionDetail } from './pages/TransactionDetail';
 import { Investigation } from './pages/Investigation';
 import { Feedback } from './pages/Feedback';
 import { BusinessTreasury } from './pages/BusinessTreasury';
+import { BankLayout } from './components/BankLayout';
+import { BankDashboard, TransactionsPage, AlertsPage, AnalyticsPage, CustomersPage, MerchantsPage, PoliciesPage, ModelsPage, ReportsPage, AuditPage, SettingsPage } from './pages/BankPages';
 
 /* -------------------------------------------------------------------------- */
 /* Customer routes                                                            */
