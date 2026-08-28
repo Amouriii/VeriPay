@@ -2,173 +2,277 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ------------------------------------------------------------------------- */
-/* Design tokens — Apple-inspired glass system.                              */
-/* RGB triplets feed Tailwind alpha utilities; full colors feed materials.   */
-/* ------------------------------------------------------------------------- */
+@layer base {
+  :root {
+    /* ================================================================
+       VERIPAY CORE PALETTE
+       ================================================================ */
 
-:root {
-  --canvas: 245 246 250;        /* #f5f6fa */
-  --ink: 26 29 41;              /* #1a1d29 */
-  --ink-muted: 92 98 112;       /* #5c6270 */
-  --ink-subtle: 139 145 159;    /* #8b919f */
-  --accent: 79 70 229;          /* indigo 600 */
-  --accent-strong: 67 56 202;   /* indigo 700 */
-  --accent-soft: 99 102 241;    /* indigo 500 */
-  --steel: 2 132 199;           /* steel blue */
+    --vp-navy: #102a43;
+    --vp-navy-dark: #0b1f33;
 
-  --shadow-color: 15 23 42;
+    --vp-indigo: #29265f;
+    --vp-indigo-dark: #201b4b;
+    --vp-indigo-light: #eeeaff;
 
-  --glass-fill: rgb(255 255 255 / 0.62);
-  --glass-hairline: rgb(255 255 255 / 0.65);
-  --glass-edge: rgb(15 23 42 / 0.05);
-  --glass-highlight: rgb(255 255 255 / 0.5);
+    --vp-teal: #087f7a;
+    --vp-teal-dark: #05635f;
+    --vp-teal-bright: #0a9f98;
+    --vp-teal-light: #e7f7f5;
 
-  --chrome-fill: rgb(255 255 255 / 0.55);
-  --chrome-hairline: rgb(255 255 255 / 0.6);
+    --vp-cyan: #43cddd;
+    --vp-cyan-light: #e8f9fc;
 
-  --field-fill: rgb(255 255 255 / 0.55);
-  --field-hairline: rgb(15 23 42 / 0.08);
+    --vp-blue: #5268d8;
+    --vp-blue-light: #dceaff;
 
-  --separator: rgb(15 23 42 / 0.06);
+    --vp-green: #087a5e;
+    --vp-green-light: #ecfdf5;
 
-  color-scheme: light;
-}
+    --vp-orange: #c56a00;
+    --vp-orange-bright: #f59e0b;
+    --vp-orange-light: #fff7e6;
 
-.dark {
-  --canvas: 11 19 31;           /* #0b131f deep obsidian */
-  --ink: 245 245 247;           /* #f5f5f7 */
-  --ink-muted: 161 161 170;     /* #a1a1aa */
-  --ink-subtle: 113 118 132;
-  --accent: 129 140 248;        /* indigo 400 */
-  --accent-strong: 99 102 241;  /* indigo 500 */
-  --accent-soft: 165 180 252;   /* indigo 300 */
-  --steel: 56 189 248;
+    --vp-red: #c0392b;
+    --vp-red-bright: #ef4444;
+    --vp-red-dark: #a93226;
+    --vp-red-light: #fff1ef;
 
-  --shadow-color: 0 0 0;
+    --vp-purple: #7566c9;
+    --vp-purple-light: #e9e5ff;
 
-  --glass-fill: rgb(255 255 255 / 0.055);
-  --glass-hairline: rgb(255 255 255 / 0.12);
-  --glass-edge: rgb(0 0 0 / 0.28);
-  --glass-highlight: rgb(255 255 255 / 0.07);
+    /* ================================================================
+       CUSTOMER SURFACES
+       ================================================================ */
 
-  --chrome-fill: rgb(13 18 29 / 0.6);
-  --chrome-hairline: rgb(255 255 255 / 0.1);
+    --vp-bg: #dcecff;
+    --vp-bg-customer: #dcecff;
+    --vp-bg-bank: #eef1f7;
 
-  --field-fill: rgb(255 255 255 / 0.07);
-  --field-hairline: rgb(255 255 255 / 0.12);
+    --vp-surface: #edf4ff;
+    --vp-surface-soft: #e5efff;
+    --vp-surface-teal: #e0f5f4;
+    --vp-surface-blue: #e1ecff;
+    --vp-surface-purple: #ebe7ff;
 
-  --separator: rgb(255 255 255 / 0.08);
+    /* ================================================================
+       BORDERS
+       ================================================================ */
 
-  color-scheme: dark;
-}
+    --vp-border: #bfd0ea;
+    --vp-border-strong: #aebfdd;
 
-html {
-  height: 100%;
-}
+    --vp-border-red: #f0c8c2;
+    --vp-border-orange: #f0d49d;
+    --vp-border-green: #bfe3d5;
+    --vp-border-blue: #bfd1f2;
+    --vp-border-purple: #ccc4ed;
 
-body {
-  min-height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
-    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background: rgb(var(--canvas));
-  color: rgb(var(--ink));
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
+    /* ================================================================
+       TEXT
+       ================================================================ */
 
-/* Aurora backdrop — the color field that makes frosted materials read as glass. */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(52rem 34rem at 10% -10%, rgb(99 102 241 / 0.18), transparent 62%),
-    radial-gradient(44rem 30rem at 98% 2%, rgb(139 92 246 / 0.14), transparent 60%),
-    radial-gradient(46rem 30rem at 52% 112%, rgb(2 132 199 / 0.12), transparent 62%),
-    linear-gradient(180deg, rgb(250 250 253), rgb(238 240 248));
-}
+    --vp-text: #17324d;
+    --vp-text-soft: #536b8d;
+    --vp-muted: #647a99;
+    --vp-subtle: #8192aa;
 
-.dark body::before {
-  background:
-    radial-gradient(52rem 34rem at 8% -12%, rgb(99 102 241 / 0.17), transparent 60%),
-    radial-gradient(44rem 30rem at 100% 0%, rgb(139 92 246 / 0.11), transparent 58%),
-    radial-gradient(48rem 32rem at 50% 114%, rgb(56 189 248 / 0.09), transparent 60%),
-    linear-gradient(180deg, rgb(12 19 31), rgb(8 13 22));
+    /* ================================================================
+       SHADOWS
+       ================================================================ */
+
+    --vp-shadow-sm: 0 1px 2px rgba(23, 50, 77, 0.06);
+    --vp-shadow-md: 0 8px 24px rgba(23, 50, 77, 0.1);
+  }
+
+  html {
+    background: var(--vp-bg);
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    background: var(--vp-bg);
+    color: var(--vp-text);
+    font-family:
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  ::selection {
+    background: #cbdcff;
+    color: #17324d;
+  }
 }
 
 @layer components {
-  /* Frosted panel material — cards and content sections. */
-  .glass-panel {
-    background: var(--glass-fill);
-    -webkit-backdrop-filter: blur(28px) saturate(170%);
-    backdrop-filter: blur(28px) saturate(170%);
-    border: 1px solid var(--glass-hairline);
-    box-shadow:
-      0 0 0 1px var(--glass-edge),
-      0 12px 40px rgb(var(--shadow-color) / 0.1),
-      inset 0 1px 0 var(--glass-highlight);
+
+  /* ================================================================
+     GENERAL CARDS
+     ================================================================ */
+
+  .vp-card {
+    @apply rounded-xl border;
+    border-color: var(--vp-border);
+
+    background: linear-gradient(
+      135deg,
+      #edf4ff 0%,
+      #e8efff 55%,
+      #ebe7ff 100%
+    );
+
+    box-shadow: var(--vp-shadow-sm);
   }
 
-  /* Chrome material — sidebar and top bar: heavier blur, calmer fill. */
-  .glass-chrome {
-    background: var(--chrome-fill);
-    -webkit-backdrop-filter: blur(36px) saturate(180%);
-    backdrop-filter: blur(36px) saturate(180%);
+  .vp-card-compact {
+    @apply rounded-xl border;
+    border-color: var(--vp-border);
+
+    background: linear-gradient(
+      135deg,
+      #edf4ff 0%,
+      #e6f0ff 55%,
+      #e2f4f4 100%
+    );
+
+    box-shadow: var(--vp-shadow-sm);
   }
 
-  /* Frosted form fields and subtle controls. */
-  .glass-field {
-    background: var(--field-fill);
-    border: 1px solid var(--field-hairline);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-    color: rgb(var(--ink));
-    transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+  .vp-card-hover {
+    @apply transition;
   }
-  .glass-field::placeholder {
-    color: rgb(var(--ink-subtle));
+
+  .vp-card-hover:hover {
+    box-shadow: var(--vp-shadow-md);
+    transform: translateY(-1px);
   }
-  .glass-field:focus {
-    outline: none;
-    border-color: rgb(var(--accent) / 0.55);
-    box-shadow: 0 0 0 4px rgb(var(--accent) / 0.15);
+
+  /* ================================================================
+     SECTION LABELS
+     ================================================================ */
+
+  .vp-section-label {
+    @apply text-[10px] font-black uppercase tracking-[0.18em];
+    color: var(--vp-teal);
   }
-}
 
-::selection {
-  background: rgb(var(--accent) / 0.24);
-}
+  .vp-bank-section-label {
+    @apply text-[10px] font-black uppercase tracking-[0.18em];
+    color: #5145a6;
+  }
 
-/* Overlay-style thin scrollbars. */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgb(var(--ink-subtle) / 0.4) transparent;
-}
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgb(var(--ink-subtle) / 0.4);
-  background-clip: content-box;
-  border: 2px solid transparent;
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background-color: rgb(var(--ink-subtle) / 0.6);
-}
+  /* ================================================================
+     CUSTOMER STATES
+     ================================================================ */
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
+  .vp-status-critical {
+    @apply rounded-xl border;
+    border-color: var(--vp-border-red);
+    background: var(--vp-red-light);
+    color: var(--vp-red);
+  }
+
+  .vp-status-warning {
+    @apply rounded-xl border;
+    border-color: var(--vp-border-orange);
+    background: var(--vp-orange-light);
+    color: var(--vp-orange);
+  }
+
+  .vp-status-success {
+    @apply rounded-xl border;
+    border-color: var(--vp-border-green);
+    background: var(--vp-green-light);
+    color: var(--vp-green);
+  }
+
+  .vp-status-info {
+    @apply rounded-xl border;
+    border-color: var(--vp-border-blue);
+    background: var(--vp-blue-light);
+    color: var(--vp-blue);
+  }
+
+  /* ================================================================
+     BANK CONSOLE STATES
+     ================================================================ */
+
+  .vp-bank-critical {
+    @apply border-l-4 border-red-500 bg-red-50;
+  }
+
+  .vp-bank-high {
+    @apply border-l-4 border-orange-400 bg-orange-50;
+  }
+
+  .vp-bank-medium {
+    @apply border-l-4 border-amber-400 bg-amber-50;
+  }
+
+  .vp-bank-normal {
+    @apply border-l-4 border-teal-500 bg-teal-50;
+  }
+
+  /* ================================================================
+     SMALL METRIC CARDS
+     ================================================================ */
+
+  .vp-metric {
+    @apply rounded-xl border px-4 py-3;
+    border-color: var(--vp-border);
+
+    background: linear-gradient(
+      135deg,
+      #edf4ff,
+      #e9e7ff
+    );
+
+    box-shadow: var(--vp-shadow-sm);
+  }
+
+  /* ================================================================
+     SCROLLBARS
+     ================================================================ */
+
+  .vp-scrollbar::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+  }
+
+  .vp-scrollbar::-webkit-scrollbar-track {
+    background: #d5e3fa;
+  }
+
+  .vp-scrollbar::-webkit-scrollbar-thumb {
+    background: #aebfdd;
+    border-radius: 999px;
+  }
+
+  .vp-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #8fa5c8;
   }
 }
