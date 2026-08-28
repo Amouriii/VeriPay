@@ -2,28 +2,173 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ------------------------------------------------------------------------- */
+/* Design tokens — Apple-inspired glass system.                              */
+/* RGB triplets feed Tailwind alpha utilities; full colors feed materials.   */
+/* ------------------------------------------------------------------------- */
+
 :root {
-  --base-deep-obsidian: #0b131f;
-  --polar-white: #fafafc;
-  --cool-gray-surface: #f0f3f7;
-  --muted-charcoal: #333a48;
-  --customer-indigo: #4f46e5;
-  --business-steel-blue: #0284c7;
+  --canvas: 245 246 250;        /* #f5f6fa */
+  --ink: 26 29 41;              /* #1a1d29 */
+  --ink-muted: 92 98 112;       /* #5c6270 */
+  --ink-subtle: 139 145 159;    /* #8b919f */
+  --accent: 79 70 229;          /* indigo 600 */
+  --accent-strong: 67 56 202;   /* indigo 700 */
+  --accent-soft: 99 102 241;    /* indigo 500 */
+  --steel: 2 132 199;           /* steel blue */
+
+  --shadow-color: 15 23 42;
+
+  --glass-fill: rgb(255 255 255 / 0.62);
+  --glass-hairline: rgb(255 255 255 / 0.65);
+  --glass-edge: rgb(15 23 42 / 0.05);
+  --glass-highlight: rgb(255 255 255 / 0.5);
+
+  --chrome-fill: rgb(255 255 255 / 0.55);
+  --chrome-hairline: rgb(255 255 255 / 0.6);
+
+  --field-fill: rgb(255 255 255 / 0.55);
+  --field-hairline: rgb(15 23 42 / 0.08);
+
+  --separator: rgb(15 23 42 / 0.06);
+
+  color-scheme: light;
+}
+
+.dark {
+  --canvas: 11 19 31;           /* #0b131f deep obsidian */
+  --ink: 245 245 247;           /* #f5f5f7 */
+  --ink-muted: 161 161 170;     /* #a1a1aa */
+  --ink-subtle: 113 118 132;
+  --accent: 129 140 248;        /* indigo 400 */
+  --accent-strong: 99 102 241;  /* indigo 500 */
+  --accent-soft: 165 180 252;   /* indigo 300 */
+  --steel: 56 189 248;
+
+  --shadow-color: 0 0 0;
+
+  --glass-fill: rgb(255 255 255 / 0.055);
+  --glass-hairline: rgb(255 255 255 / 0.12);
+  --glass-edge: rgb(0 0 0 / 0.28);
+  --glass-highlight: rgb(255 255 255 / 0.07);
+
+  --chrome-fill: rgb(13 18 29 / 0.6);
+  --chrome-hairline: rgb(255 255 255 / 0.1);
+
+  --field-fill: rgb(255 255 255 / 0.07);
+  --field-hairline: rgb(255 255 255 / 0.12);
+
+  --separator: rgb(255 255 255 / 0.08);
+
+  color-scheme: dark;
+}
+
+html {
+  height: 100%;
 }
 
 body {
-  background: var(--polar-white);
-  color: var(--muted-charcoal);
+  min-height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: rgb(var(--canvas));
+  color: rgb(var(--ink));
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Aurora backdrop — the color field that makes frosted materials read as glass. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(52rem 34rem at 10% -10%, rgb(99 102 241 / 0.18), transparent 62%),
+    radial-gradient(44rem 30rem at 98% 2%, rgb(139 92 246 / 0.14), transparent 60%),
+    radial-gradient(46rem 30rem at 52% 112%, rgb(2 132 199 / 0.12), transparent 62%),
+    linear-gradient(180deg, rgb(250 250 253), rgb(238 240 248));
+}
+
+.dark body::before {
+  background:
+    radial-gradient(52rem 34rem at 8% -12%, rgb(99 102 241 / 0.17), transparent 60%),
+    radial-gradient(44rem 30rem at 100% 0%, rgb(139 92 246 / 0.11), transparent 58%),
+    radial-gradient(48rem 32rem at 50% 114%, rgb(56 189 248 / 0.09), transparent 60%),
+    linear-gradient(180deg, rgb(12 19 31), rgb(8 13 22));
 }
 
 @layer components {
-  .app-shell {
-    background: var(--polar-white);
-    color: var(--muted-charcoal);
+  /* Frosted panel material — cards and content sections. */
+  .glass-panel {
+    background: var(--glass-fill);
+    -webkit-backdrop-filter: blur(28px) saturate(170%);
+    backdrop-filter: blur(28px) saturate(170%);
+    border: 1px solid var(--glass-hairline);
+    box-shadow:
+      0 0 0 1px var(--glass-edge),
+      0 12px 40px rgb(var(--shadow-color) / 0.1),
+      inset 0 1px 0 var(--glass-highlight);
   }
 
-  .ops-header {
-    background: var(--base-deep-obsidian);
-    color: var(--polar-white);
+  /* Chrome material — sidebar and top bar: heavier blur, calmer fill. */
+  .glass-chrome {
+    background: var(--chrome-fill);
+    -webkit-backdrop-filter: blur(36px) saturate(180%);
+    backdrop-filter: blur(36px) saturate(180%);
+  }
+
+  /* Frosted form fields and subtle controls. */
+  .glass-field {
+    background: var(--field-fill);
+    border: 1px solid var(--field-hairline);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    color: rgb(var(--ink));
+    transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+  }
+  .glass-field::placeholder {
+    color: rgb(var(--ink-subtle));
+  }
+  .glass-field:focus {
+    outline: none;
+    border-color: rgb(var(--accent) / 0.55);
+    box-shadow: 0 0 0 4px rgb(var(--accent) / 0.15);
+  }
+}
+
+::selection {
+  background: rgb(var(--accent) / 0.24);
+}
+
+/* Overlay-style thin scrollbars. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--ink-subtle) / 0.4) transparent;
+}
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--ink-subtle) / 0.4);
+  background-clip: content-box;
+  border: 2px solid transparent;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(var(--ink-subtle) / 0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
   }
 }
