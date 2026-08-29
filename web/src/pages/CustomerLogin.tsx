@@ -21,7 +21,7 @@ export function CustomerLogin() {
       <section className="w-full max-w-sm">
 
         <div className="mb-7 flex justify-center">
-          <VeriPayMark variant="teal" />
+          <VeriPayMark />
         </div>
 
         <div className="rounded-2xl border border-[#BFD0EA] bg-gradient-to-br from-[#EDF4FF] via-[#E9EEFF] to-[#EAE7FF] p-6 shadow-[0_18px_50px_rgba(82,104,216,0.16)] sm:p-8">

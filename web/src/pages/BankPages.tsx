@@ -2,6 +2,9 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { auditLogs, bankTransactions, customers, merchants, notifications, type BankTransaction } from '../bankData';
 
+const btnPrimary = 'rounded-lg bg-[#43cddd] px-4 py-2 text-sm font-bold text-[#29265f] shadow-sm transition hover:bg-[#5bd8e5] disabled:cursor-not-allowed disabled:opacity-40';
+const btnSecondary = 'rounded-lg border border-white/30 bg-white/10 px-4 py-2 text-sm font-bold text-ink transition hover:bg-white/20';
+
 const badge = (value: string) => { const normalized = value.toUpperCase(); return normalized.includes('CRITICAL') || normalized.includes('BLOCKED') || normalized.includes('DENIED') ? 'bg-red-600 text-white' : normalized.includes('HIGH') ? 'bg-orange-100 text-orange-800' : normalized.includes('BLOCK') ? 'bg-red-50 text-red-700' : normalized.includes('MEDIUM') || normalized.includes('VERIFY') || normalized.includes('REVIEW') || normalized.includes('PENDING') || normalized.includes('VERIFICATION_REQUIRED') ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'; };
 const Money = ({ value }: { value: number }) => <>{new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(value)}</>;
 const Pill = ({ value }: { value: string }) => <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${badge(value)}`}>{value.replaceAll('_', ' ')}</span>;
