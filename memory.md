@@ -50,21 +50,22 @@ next implementation slices:
 - Local infrastructure documentation, corrected Compose build contexts, and
   dependency inclusion for standalone service-stack validation.
 
-## Verification completed
+## Gap-closure session (feat/blueprint-alignment, 2026-08-29)
 
+- Fixed three web TypeScript compile errors that broke `tsc -b` and `npm run
+  build`: `BankPages.tsx` referenced undefined `btnPrimary`/`btnSecondary`
+  glass-theme button constants (now defined at module top, matching the glass
+  console theme), and `CustomerLogin.tsx` passed a nonexistent `variant="teal"`
+  prop to `VeriPayMark` (component accepts only `compact`).
+- Web verification after fixes: `tsc --noEmit` clean, ESLint clean, Vitest 1
+  passed, `npm run build` succeeds.
 - Full Python suite: **111 passed**, one existing FastAPI/httpx deprecation
   warning remains.
-- Focused control group: **28 passed**.
-- Context and feedback group: **20 passed**.
-- Dispute and portal group: **22 passed**.
-- Operational portal/device/context regression group: **27 passed**.
+- Compose dependency/backend/combined config validation re-verified: **passed**.
+- iOS SwiftPM tests re-verified: **3 passed**.
 - Ruff check: **passed**.
 - Ruff format check: **passed**.
 - `git diff --check`: **passed**.
-- Web Vitest: **1 passed**.
-- Web ESLint: **passed**.
-- iOS SwiftPM tests: **3 passed**.
-- Compose dependency, backend, and combined configurations: **passed**.
 - Local mypy was unavailable because `.venv/bin/mypy` is not installed.
 - Android Gradle tests were not run locally because no Gradle wrapper or `gradle`
   executable is available; GitHub CI has an Android job for that environment.
@@ -82,5 +83,18 @@ next implementation slices:
 
 ## Git and collaboration
 
-Implementation is uncommitted on `feat/developer5-core-expansion` until explicitly
+Implementation is uncommitted on `feat/blueprint-alignment` until explicitly
 requested. Branch protection requires pull requests for changes to `main`.
+
+## Verification status (feat/blueprint-alignment, 2026-08-29)
+
+- Python: 111 tests passed, ruff check/format passed, git diff --check passed
+- Web: tsc clean, ESLint passed, Vitest 1 passed, production build succeeds
+- iOS SwiftPM tests: 3 passed
+- Compose dependency/backend/combined config validation: passed
+- Local mypy unavailable (.venv/bin/mypy not installed); CI installs it
+- Android Gradle tests: not run locally (no Gradle wrapper); CI job covers it
+- Android deployable app explicitly out of scope this session
+- Web build pipeline now verified end-to-end: `tsc --noEmit`, ESLint, Vitest,
+  and `npm run build` all pass on this branch (the glass-theme button constants
+  and login-mark prop fixes are in place).
