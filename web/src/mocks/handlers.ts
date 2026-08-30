@@ -1,46 +1,42 @@
-// MSW (Mock Service Worker) handlers for the local demo.
-// Paths and payloads mirror the web client contract (web/src/api, web/src/types).
+// MSW (Mock Service Worker) handlers for Day-1 parallel development.
+// Dev 2 builds all React UI against these mocks before backend is live.
 import { http, HttpResponse } from "msw";
 import { analystHandlers } from "./analystHandlers";
 
-const transactions = [
-  {
-    transactionId: "tx_mock_001",
-    userId: "u_100",
-    amountMinor: 4999,
-    currency: "USD",
-    merchantId: "m_amazon",
-  },
-  {
-    transactionId: "tx_mock_002",
-    userId: "u_204",
-    amountMinor: 125000,
-    currency: "USD",
-    merchantId: "m_wire",
-  },
-  {
-    transactionId: "tx_mock_003",
-    userId: "u_077",
-    amountMinor: 2140,
-    currency: "EUR",
-    merchantId: "m_insta",
-  },
-];
-
 export const handlers = [
   ...analystHandlers,
+  http.get("/api/v1/transactions", () =>
+    HttpResponse.json([
+      {
+        transaction_id: "tx_mock_001",
+        user_id: "u_100",
+        amount_minor: 4999,
+        currency: "USD",
+        merchant_id: "m_amazon",
+        mti: "0100",
+        channel: "CARD_NOT_PRESENT",
+      },
+    ]),
+  ),
 
-  http.get("/api/transactions", () => HttpResponse.json(transactions)),
-
-  http.get("/api/transactions/:txId/risk", ({ params }) =>
+  http.get("/api/v1/transactions/:txId/risk", () =>
     HttpResponse.json({
-      transactionId: params.txId,
-      unifiedScore: 42,
+      transaction_id: "tx_mock_001",
+      unified_score: 42,
       band: "VERIFY",
       components: [
-        { component: "supervised", score: 35, weight: 0.3, available: true, reasonCode: "NEW_DEVICE" },
+        { component: "supervised", score: 35, weight: 0.3, available: true, reason_code: "NEW_DEVICE" },
         { component: "anomaly", score: 50, weight: 0.15, available: true },
       ],
+    }),
+  ),
+
+  http.post("/api/v1/investigate/:txId", () =>
+    HttpResponse.json({
+      transaction_id: "tx_mock_001",
+      analyst_summary:
+        "Transaction flagged for elevated risk. Primary driver: NEW_DEVICE with z-score 2.8 on amount.",
+      guardrail_violation: false,
     }),
   ),
 ];
