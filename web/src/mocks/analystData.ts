@@ -10,6 +10,10 @@ import type {
   FeedbackHistoryEntry,
   FeedbackStats,
   FeatureRow,
+  Community,
+  CustomerNetwork,
+  NetworkEgo,
+  NetworkFeatures,
   RiskLevel,
   ScoreResponse,
 } from '../types/analyst';
@@ -51,6 +55,203 @@ function makeRecentTransactions(seed: number, base: number): ScoreResponse['rece
   }
   return out;
 }
+
+/** Network (graph) context fixtures (PLAN §12). Each demo transaction carries a
+ * graph payload so the new "Network" tab is navigable without a running
+ * backend. tx_9001 is the marquee shared-merchant mule/ring scenario. */
+function networkFor(
+  txId: string,
+  ccNum: number,
+  opts: {
+    risk: number;
+    available: boolean;
+    findings: string[];
+    features: NetworkFeatures;
+    ego: NetworkEgo;
+    community?: Community;
+  },
+) {
+  return {
+    network_risk_score: opts.risk,
+    network_available: opts.available,
+    network_findings: opts.findings,
+    network_features: opts.features,
+    network_ego: opts.ego,
+    network_community: opts.community,
+    _tx: txId,
+    _cc: ccNum,
+  };
+}
+
+const NETWORK_CARD_TEST = networkFor('tx_9001', 4716561796955522, {
+  risk: 0.82,
+  available: true,
+  findings: [
+    'Shares merchant(s) with 2 confirmed-fraud account(s) (flagged exposure 100%).',
+    'Connected to 2 other customer(s) via 1 shared merchant(s).',
+    'Community of 4 account(s) with a 50% confirmed-fraud ratio.',
+  ],
+  features: {
+    merchant_degree: 1,
+    merchant_fan_in: 3,
+    shared_counterparty_count: 2,
+    co_occurrence_count: 1,
+    flagged_neighbor_count: 2,
+    flagged_exposure: 1.0,
+    cluster_size: 4,
+    cluster_flagged_ratio: 0.5,
+  },
+  ego: {
+    nodes: [
+      { id: 'c:4716561796955522', kind: 'customer', label: '4716561796955522', status: 'self' },
+      { id: 'm:fraud_Kerluke', kind: 'merchant', label: 'fraud_Kerluke', status: 'review' },
+      { id: 'c:4012888888881881', kind: 'customer', label: '4012888888881881', status: 'flagged' },
+      { id: 'c:5555555555554444', kind: 'customer', label: '5555555555554444', status: 'flagged' },
+    ],
+    edges: [
+      { from: 'c:4716561796955522', to: 'm:fraud_Kerluke', weight: 560 },
+      { from: 'c:4012888888881881', to: 'm:fraud_Kerluke', weight: 1200 },
+      { from: 'c:5555555555554444', to: 'm:fraud_Kerluke', weight: 1405 },
+    ],
+  },
+  community: {
+    graph: {
+      nodes: [
+        { id: 'c:4716561796955522', kind: 'customer', label: '4716561796955522', status: 'self' },
+        { id: 'c:4012888888881881', kind: 'customer', label: '4012888888881881', status: 'flagged' },
+        { id: 'c:5555555555554444', kind: 'customer', label: '5555555555554444', status: 'flagged' },
+        { id: 'c:5105105105105100', kind: 'customer', label: '5105105105105100', status: 'normal' },
+        { id: 'm:fraud_Kerluke', kind: 'merchant', label: 'fraud_Kerluke', status: 'review' },
+      ],
+      edges: [
+        { from: 'c:4716561796955522', to: 'm:fraud_Kerluke', weight: 560 },
+        { from: 'c:4012888888881881', to: 'm:fraud_Kerluke', weight: 1200 },
+        { from: 'c:5555555555554444', to: 'm:fraud_Kerluke', weight: 1405 },
+        { from: 'c:5105105105105100', to: 'm:fraud_Kerluke', weight: 2300 },
+      ],
+    },
+    stats: {
+      cluster_size: 4,
+      flagged_count: 2,
+      flagged_ratio: 0.5,
+      distinct_shared_merchants: 1,
+      total_volume: 5465,
+      dominant_pattern: 'fraud_ring',
+    },
+    members: [
+      { cc_num: 4716561796955522, status: 'self' },
+      { cc_num: 4012888888881881, status: 'flagged' },
+      { cc_num: 5555555555554444, status: 'flagged' },
+      { cc_num: 5105105105105100, status: 'normal' },
+    ],
+  },
+});
+
+const NETWORK_IMPOSSIBLE = networkFor('tx_9002', 4012888888881881, {
+  risk: 0.41,
+  available: true,
+  findings: [
+    'Connected to 1 other customer(s) via 1 shared merchant(s).',
+    '1 temporal co-occurrence(s) — peer transaction(s) at the same merchant within 60s.',
+  ],
+  features: {
+    merchant_degree: 1,
+    merchant_fan_in: 2,
+    shared_counterparty_count: 1,
+    co_occurrence_count: 1,
+    flagged_neighbor_count: 0,
+    flagged_exposure: 0.0,
+    cluster_size: 2,
+    cluster_flagged_ratio: 0.0,
+  },
+  ego: {
+    nodes: [
+      { id: 'c:4012888888881881', kind: 'customer', label: '4012888888881881', status: 'self' },
+      { id: 'm:GlobalAirlines', kind: 'merchant', label: 'GlobalAirlines', status: 'normal' },
+      { id: 'c:5105105105105100', kind: 'customer', label: '5105105105105100', status: 'normal' },
+    ],
+    edges: [
+      { from: 'c:4012888888881881', to: 'm:GlobalAirlines', weight: 1240 },
+      { from: 'c:5105105105105100', to: 'm:GlobalAirlines', weight: 2300 },
+    ],
+  },
+});
+
+const NETWORK_AMOUNT_SPIKE = networkFor('tx_9003', 5105105105105100, {
+  risk: 0.18,
+  available: true,
+  findings: ['Connected to 1 other customer(s) via 1 shared merchant(s).'],
+  features: {
+    merchant_degree: 1,
+    merchant_fan_in: 2,
+    shared_counterparty_count: 1,
+    co_occurrence_count: 0,
+    flagged_neighbor_count: 0,
+    flagged_exposure: 0.0,
+    cluster_size: 2,
+    cluster_flagged_ratio: 0.0,
+  },
+  ego: {
+    nodes: [
+      { id: 'c:5105105105105100', kind: 'customer', label: '5105105105105100', status: 'self' },
+      { id: 'm:Grand Hotel', kind: 'merchant', label: 'Grand Hotel', status: 'normal' },
+    ],
+    edges: [{ from: 'c:5105105105105100', to: 'm:Grand Hotel', weight: 2300 }],
+  },
+});
+
+const NETWORK_FAILED_AUTH = networkFor('tx_9004', 5555555555554444, {
+  risk: 0.62,
+  available: true,
+  findings: [
+    'Shares merchant(s) with 1 confirmed-fraud account(s) (flagged exposure 100%).',
+    'Connected to 2 other customer(s) via 1 shared merchant(s).',
+  ],
+  features: {
+    merchant_degree: 1,
+    merchant_fan_in: 3,
+    shared_counterparty_count: 2,
+    co_occurrence_count: 0,
+    flagged_neighbor_count: 1,
+    flagged_exposure: 0.5,
+    cluster_size: 3,
+    cluster_flagged_ratio: 0.33,
+  },
+  ego: {
+    nodes: [
+      { id: 'c:5555555555554444', kind: 'customer', label: '5555555555554444', status: 'self' },
+      { id: 'm:WireTransferPlus', kind: 'merchant', label: 'WireTransferPlus', status: 'review' },
+      { id: 'c:4716561796955522', kind: 'customer', label: '4716561796955522', status: 'flagged' },
+    ],
+    edges: [
+      { from: 'c:5555555555554444', to: 'm:WireTransferPlus', weight: 1405 },
+      { from: 'c:4716561796955522', to: 'm:WireTransferPlus', weight: 560 },
+    ],
+  },
+});
+
+const NETWORK_ODD_HOURS = networkFor('tx_9005', 4222222222222, {
+  risk: 0.0,
+  available: false,
+  findings: [],
+  features: {
+    merchant_degree: 1,
+    merchant_fan_in: 1,
+    shared_counterparty_count: 0,
+    co_occurrence_count: 0,
+    flagged_neighbor_count: 0,
+    flagged_exposure: 0.0,
+    cluster_size: 1,
+    cluster_flagged_ratio: 0.0,
+  },
+  ego: {
+    nodes: [
+      { id: 'c:4222222222222', kind: 'customer', label: '4222222222222', status: 'self' },
+      { id: 'm:MidnightMart', kind: 'merchant', label: 'MidnightMart', status: 'normal' },
+    ],
+    edges: [{ from: 'c:4222222222222', to: 'm:MidnightMart', weight: 205 }],
+  },
+});
 
 /** Card-testing example from the guide: velocity + large amount at new merchant. */
 const CARD_TEST: ScoreResponse = {
@@ -95,7 +296,8 @@ const CARD_TEST: ScoreResponse = {
     { feature: 'Distinct merchants (30d)', shap_value: -0.2 },
   ],
   recent_transactions: makeRecentTransactions(1, 10),
-};
+  ...NETWORK_CARD_TEST,
+} as ScoreResponse;
 
 /** Impossible travel: physically implausible distance in the inter-arrival window. */
 const IMPOSSIBLE_TRAVEL: ScoreResponse = {
@@ -139,7 +341,8 @@ const IMPOSSIBLE_TRAVEL: ScoreResponse = {
     { feature: 'Known category', shap_value: -0.12 },
   ],
   recent_transactions: makeRecentTransactions(2, 80),
-};
+  ...NETWORK_IMPOSSIBLE,
+} as ScoreResponse;
 
 /** High-value spike at a brand-new merchant during the evening. */
 const AMOUNT_SPIKE: ScoreResponse = {
@@ -184,7 +387,8 @@ const AMOUNT_SPIKE: ScoreResponse = {
     { feature: 'Known category', shap_value: -0.15 },
   ],
   recent_transactions: makeRecentTransactions(3, 40),
-};
+  ...NETWORK_AMOUNT_SPIKE,
+} as ScoreResponse;
 
 /** Repeated failures followed by a large success — credential-stuffing signal. */
 const FAILED_AUTH: ScoreResponse = {
@@ -229,7 +433,8 @@ const FAILED_AUTH: ScoreResponse = {
     { feature: 'Known category', shap_value: -0.3 },
   ],
   recent_transactions: makeRecentTransactions(4, 30),
-};
+  ...NETWORK_FAILED_AUTH,
+} as ScoreResponse;
 
 /** Low-hum odd-hours cluster — REVIEW_UNUSUAL, live customer confirm. */
 const ODD_HOURS: ScoreResponse = {
@@ -272,7 +477,8 @@ const ODD_HOURS: ScoreResponse = {
     { feature: 'Known category', shap_value: -0.12 },
   ],
   recent_transactions: makeRecentTransactions(5, 25),
-};
+  ...NETWORK_ODD_HOURS,
+} as ScoreResponse;
 
 export const SCORES: ScoreResponse[] = [
   CARD_TEST,
@@ -392,12 +598,27 @@ export function getScore(txIdOrCcNum: string | number): ScoreResponse | undefine
 export function getExplain(txId: string): ExplainResponse | undefined {
   const score = getScore(txId);
   if (!score) return undefined;
+  const base = CASE_REPORTS[score.transaction_id];
+  // Append network context to the case report so the explanation surfaces the
+  // graph findings alongside the per-transaction evidence (PLAN §12).
+  const networkEvidence: string[] = score.network_available
+    ? [
+        `Network risk score ${score.network_risk_score.toFixed(4)} (graph axis available).`,
+        ...score.network_findings,
+      ]
+    : [];
+  const case_report = {
+    ...base,
+    evidence: [...base.evidence, ...networkEvidence],
+    crosschecked: true,
+    hallucination_flagged: false,
+  };
   return {
     transaction_id: score.transaction_id,
     cc_num: score.cc_num,
     risk_level: score.risk_level,
     verification_action: score.verification_action,
-    case_report: CASE_REPORTS[score.transaction_id],
+    case_report,
   };
 }
 
@@ -457,6 +678,32 @@ export function getProfile(ccNum: number): CustomerProfileResponse | undefined {
             level: 'normal',
             message: 'Normal — no recent feedback',
           },
+  };
+}
+
+/** Network (graph) context for the customer profile page (PLAN §12). Derives
+ * the ego + community payload from the same fixture scores so the profile's
+ * Network panel is navigable without an open alert. */
+export function getNetwork(ccNum: number): CustomerNetwork | undefined {
+  const score = getScore(ccNum);
+  if (!score) return undefined;
+  return {
+    cc_num: ccNum,
+    network_risk_score: score.network_risk_score,
+    available: score.network_available,
+    findings: score.network_findings,
+    features: score.network_features ?? {
+      merchant_degree: 0,
+      merchant_fan_in: 0,
+      shared_counterparty_count: 0,
+      co_occurrence_count: 0,
+      flagged_neighbor_count: 0,
+      flagged_exposure: 0,
+      cluster_size: 0,
+      cluster_flagged_ratio: 0,
+    },
+    ego: score.network_ego ?? { nodes: [], edges: [] },
+    community: score.network_community,
   };
 }
 

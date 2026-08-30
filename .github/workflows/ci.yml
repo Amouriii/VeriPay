@@ -181,6 +181,7 @@ jobs:
           - fi_ops_portal
           - business_portal
           - model_monitor
+          - analyst_api
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -346,6 +347,42 @@ jobs:
       - name: vitest
         run: npm test -- --run
         working-directory: web
+
+  # ------------------------------------------------------------ vercel ------
+  vercel-build:
+    name: Vercel build (web)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install web deps
+        run: npm ci
+      - name: Validate Vercel project configuration
+        working-directory: .
+        run: |
+          python3 -c "
+          import json
+          from pathlib import Path
+          cfg = json.loads(Path('vercel.json').read_text())
+          assert cfg.get('framework') == 'vite', 'Vercel framework must be vite'
+          assert 'rootDirectory' not in cfg, 'rootDirectory belongs in Vercel project settings, not vercel.json'
+          assert cfg.get('outputDirectory') == 'dist', 'Vercel outputDirectory must be dist'
+          assert cfg.get('buildCommand') == 'npm run build', 'Vercel buildCommand must run the web build'
+          assert cfg.get('rewrites') == [{'source': '/(.*)', 'destination': '/index.html'}], \
+              'Vercel must preserve the SPA fallback rewrite'
+          assert Path('web/package.json').is_file(), 'web/package.json is missing'
+          assert Path('web/index.html').is_file(), 'web/index.html is missing'
+          print('Vercel project configuration OK')
+          "
+      - name: Build from configured root directory
+        run: npm run build
 
   # ----------------------------------------------------------- security -----
   secret-scan:

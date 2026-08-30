@@ -50,6 +50,12 @@ export function AnalystLayout({ children }: { children: ReactNode }) {
 
         <div className="border-t border-white/10 p-4">
           <Link
+            to="/executive-demo"
+            className="mb-3 block rounded-lg px-3 py-2 text-sm text-[#e7f5ff] hover:bg-white/10"
+          >
+            ★ Executive briefing
+          </Link>
+          <Link
             to="/fi-ops"
             className="mb-3 block rounded-lg px-3 py-2 text-sm text-[#e7f5ff] hover:bg-white/10"
           >

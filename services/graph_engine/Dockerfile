@@ -7,6 +7,11 @@ WORKDIR /app
 COPY libs/veripay_common /app/libs/veripay_common
 RUN pip install --no-cache-dir /app/libs/veripay_common
 
+# Install the ML package so the top-level `graph` module (ml/graph) that this
+# service imports for the network-analysis axis is available at runtime.
+COPY ml /app/ml
+RUN pip install --no-cache-dir /app/ml
+
 # Install this service (editable so the package copied below is served).
 COPY services/graph_engine/pyproject.toml /app/pyproject.toml
 RUN pip install --no-cache-dir -e .

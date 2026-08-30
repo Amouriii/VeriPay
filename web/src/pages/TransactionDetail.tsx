@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { bankTransactions, customers } from '../bankData';
 
@@ -31,6 +32,29 @@ export function TransactionDetail() {
 
   const critical = transaction.level === 'CRITICAL';
   const high = transaction.level === 'HIGH';
+  type VerificationMethod = 'push' | 'sms' | 'email' | 'biometric';
+  type VerificationState = 'idle' | 'method' | 'processing' | 'sent' | 'passed' | 'failed';
+  const [verificationState, setVerificationState] = useState<VerificationState>('idle');
+  const [verificationMethod, setVerificationMethod] = useState<VerificationMethod | null>(null);
+  const [code, setCode] = useState('');
+  const [message, setMessage] = useState('');
+
+  const initiateVerification = (method: VerificationMethod) => {
+    setVerificationMethod(method);
+    setVerificationState('processing');
+    setMessage('');
+    window.setTimeout(() => setVerificationState('sent'), 450);
+  };
+
+  const completeVerification = () => {
+    if ((verificationMethod === 'sms' || verificationMethod === 'email') && code !== '246810') {
+      setVerificationState('failed');
+      setMessage('Code rejected. Demo code: 246810.');
+      return;
+    }
+    setVerificationState('passed');
+    setMessage('Customer verification passed. Transaction can proceed.');
+  };
 
   const levelClass = critical
     ? 'bg-red-600 text-white'
@@ -218,6 +242,21 @@ export function TransactionDetail() {
         </div>
       </section>
 
+      {/* VERIFICATION WORKFLOW */}
+      {(transaction.decision === 'VERIFY' || transaction.verification !== 'NOT_REQUIRED') && (
+        <section className="mt-6 rounded-xl border border-[#fac180] bg-white p-6 shadow-sm">
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+            <div><p className="text-xs font-bold uppercase tracking-[0.18em] text-[#c56a00]">Verification workflow</p><h2 className="mt-2 text-xl font-semibold text-[#29265f]">Request trusted customer confirmation</h2><p className="mt-1 text-sm text-slate-600">Choose a method and track the request without exposing sensitive customer data.</p></div>
+            <StatusBadge value={verificationState === 'passed' ? 'PASSED' : verificationState === 'failed' ? 'FAILED' : verificationState === 'sent' ? 'PENDING' : transaction.verification} />
+          </div>
+          {verificationState === 'idle' && <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">{([['push', 'Push notification'], ['sms', 'SMS code'], ['email', 'Email confirmation'], ['biometric', 'Biometric approval']] as [VerificationMethod, string][]).map(([method, label]) => <button key={method} type="button" onClick={() => initiateVerification(method)} className="rounded-lg border border-slate-200 px-3 py-3 text-left text-sm font-semibold text-[#29265f] transition hover:border-[#43cddd] hover:bg-[#e8f9fc]"><span className="block">{label}</span><span className="mt-1 block text-xs font-normal text-slate-500">Start request →</span></button>)}</div>}
+          {verificationState === 'processing' && <p className="mt-5 rounded-lg bg-amber-50 p-4 text-sm font-semibold text-amber-800">Creating a secure verification request…</p>}
+          {verificationState === 'sent' && verificationMethod && <div className="mt-5 rounded-lg bg-[#f7fbff] p-4"><p className="text-sm font-semibold text-[#29265f]">{verificationMethod === 'push' ? 'Push request sent to the trusted device.' : verificationMethod === 'email' ? 'Confirmation link sent to the masked email address.' : verificationMethod === 'sms' ? 'One-time code sent to the masked phone number.' : 'Biometric approval is ready on the trusted device.'}</p>{(verificationMethod === 'sms' || verificationMethod === 'email') && <input value={code} onChange={(event) => setCode(event.target.value)} maxLength={6} inputMode="numeric" placeholder="Enter 246810" className="mt-3 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm tracking-[0.3em] outline-none focus:border-[#43cddd]" />}<div className="mt-3 flex flex-wrap gap-2"><button type="button" onClick={completeVerification} className="rounded-lg bg-[#29265f] px-3 py-2 text-xs font-bold text-white">{verificationMethod === 'push' || verificationMethod === 'biometric' ? 'Mark customer verified' : 'Confirm code'}</button><button type="button" onClick={() => setVerificationState('idle')} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600">Choose another method</button></div></div>}
+          {verificationState === 'failed' && <div className="mt-5 rounded-lg bg-red-50 p-4 text-sm font-semibold text-red-700">{message}<button type="button" onClick={() => setVerificationState('sent')} className="ml-3 underline">Try again</button></div>}
+          {verificationState === 'passed' && <div className="mt-5 rounded-lg bg-emerald-50 p-4 text-sm font-semibold text-emerald-700">{message}</div>}
+        </section>
+      )}
+
       {/* RECOMMENDATIONS */}
       <section className="mt-5 rounded-xl bg-[#29265f] p-5 text-white">
         <div className="flex items-center gap-3">
@@ -260,6 +299,11 @@ export function TransactionDetail() {
 
     </main>
   );
+}
+
+function StatusBadge({ value }: { value: string }) {
+  const styles = value === 'PASSED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : value === 'FAILED' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-amber-50 text-amber-700 border-amber-200';
+  return <span className={`inline-flex rounded-full border px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-wide ${styles}`}>{value.replaceAll('_', ' ')}</span>;
 }
 
 function Recommendation({

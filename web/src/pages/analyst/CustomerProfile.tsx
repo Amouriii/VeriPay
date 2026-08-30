@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
-import { useCustomerProfile } from '../../api/analyst';
+import { useCustomerNetwork, useCustomerProfile } from '../../api/analyst';
 import type { Baseline } from '../../types/analyst';
+import { NetworkGraph } from './NetworkGraph';
 
 function BaselineCard({ title, baseline }: { title: string; baseline: Baseline }) {
   const rows: [string, string | number][] = [
@@ -28,7 +29,9 @@ function BaselineCard({ title, baseline }: { title: string; baseline: Baseline }
 export function CustomerProfile() {
   const { ccNum } = useParams<{ ccNum: string }>();
   const cc = Number(ccNum);
-  const { data, isLoading, error } = useCustomerProfile(Number.isFinite(cc) ? cc : undefined);
+  const profile = useCustomerProfile(Number.isFinite(cc) ? cc : undefined);
+  const network = useCustomerNetwork(Number.isFinite(cc) ? cc : undefined);
+  const { data, isLoading, error } = profile;
 
   if (isLoading || ccNum === undefined) {
     return <p className="py-16 text-center text-slate-500">Loading profile…</p>;
@@ -92,6 +95,33 @@ export function CustomerProfile() {
       <div className={`mt-4 rounded-xl border px-5 py-4 text-sm ${trustTone}`}>
         <p className="font-bold">{data.trust_status.message}</p>
       </div>
+
+      {/* Network panel — browse the customer's graph without an alert */}
+      <section className="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
+          Network analysis
+        </h2>
+        <p className="mb-4 mt-1 text-sm text-slate-500">
+          This customer&rsquo;s graph context (PLAN §12) — ego graph, network risk,
+          and the full fraud-ring community. Visible here without an open alert.
+        </p>
+        {network.isLoading ? (
+          <p className="py-8 text-center text-sm text-slate-500">Loading network…</p>
+        ) : network.error || !network.data ? (
+          <p className="py-8 text-center text-sm text-slate-500">
+            Network context unavailable.
+          </p>
+        ) : (
+          <NetworkGraph
+            risk={network.data.network_risk_score}
+            available={network.data.available}
+            findings={network.data.findings}
+            features={network.data.features}
+            ego={network.data.ego}
+            community={network.data.community}
+          />
+        )}
+      </section>
     </div>
   );
 }

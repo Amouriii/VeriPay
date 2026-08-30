@@ -96,6 +96,11 @@ services:
     ports: ["8008:8000"]
     env_file: [.env]
     healthcheck: *backend-healthcheck
+    environment:
+      VERIPAY_GRAPH_SEED_CSV: /datasets/synthetic/transactions_labeled.csv
+      NETWORK_WINDOW_DAYS: "30"
+    volumes:
+      - "../../datasets:/datasets:ro"
   financial_context:
     build:
       context: ../..
@@ -231,3 +236,51 @@ services:
     volumes:
       - "../../ml/models:/ml/models:ro"
       - "../../datasets:/datasets:ro"
+  # --- Analyst API composite (analyst console surface) ---
+  analyst_api:
+    build:
+      context: ../..
+      dockerfile: services/analyst_api/Dockerfile
+    ports: ["8026:8000"]
+    env_file: [.env]
+    healthcheck: *backend-healthcheck
+    environment:
+      VERIPAY_SUPERVISED_URL: http://supervised_model:8000
+      VERIPAY_ANOMALY_URL: http://anomaly_model:8000
+      VERIPAY_RISK_FUSION_URL: http://risk_fusion:8000
+      VERIPAY_DECISION_URL: http://decision_engine:8000
+      VERIPAY_INVESTIGATION_URL: http://investigation_agent:8000
+      VERIPAY_FEEDBACK_URL: http://feedback_loop:8000
+      VERIPAY_MODEL_MONITOR_URL: http://model_monitor:8000
+      VERIPAY_GRAPH_URL: http://graph_engine:8000
+      NETWORK_FUSION_WEIGHT: "0.2"
+      # Rich causal 16-feature engine (mapped onto the shared model vector).
+      FEATURE_MODE: "rich"
+    depends_on:
+      supervised_model:
+        condition: service_healthy
+      anomaly_model:
+        condition: service_healthy
+      decision_engine:
+        condition: service_healthy
+      investigation_agent:
+        condition: service_healthy
+      feedback_loop:
+        condition: service_healthy
+      graph_engine:
+        condition: service_healthy
+  # --- One-shot seed: populates the analyst console alert queue ------------
+  # Scores a realistic, deterministic batch of transactions through analyst_api
+  # so the dashboard has queue/profile data right after `docker compose up`.
+  # Re-seed any time with: docker compose run --rm seed_analyst
+  seed_analyst:
+    image: veripay-analyst_api
+    depends_on:
+      analyst_api:
+        condition: service_healthy
+    environment:
+      VERIPAY_ANALYST_API_URL: http://analyst_api:8000
+    volumes:
+      - "../../scripts/seed-analyst-queue.py:/app/seed-analyst-queue.py:ro"
+    entrypoint: ["python", "/app/seed-analyst-queue.py"]
+    restart: "no"

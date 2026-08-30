@@ -45,7 +45,7 @@ struct DashboardView: View {
       }
       Button("Cancel", role: .cancel) {}
     } message: {
-      Text("Both scenarios use fictional data and local mock analysis.")
+      Text("Fictional transaction data; risk analysis is scored live by the VeriPay analyst service when reachable, otherwise local mocks.")
     }
     .onAppear {
       withAnimation(.easeOut(duration: 0.45)) {

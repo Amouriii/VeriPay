@@ -30,3 +30,10 @@ repos:
         files: ^web/.*\.(ts|tsx)$
         types: [text]
         pass_filenames: false
+      - id: vitest
+        name: Vitest (web)
+        entry: bash -c 'cd web && ./node_modules/.bin/vitest run'
+        language: system
+        files: ^web/(src|tests)/.*\.(test|spec)\.(ts|tsx)$
+        types: [text]
+        pass_filenames: false

@@ -6,8 +6,9 @@ import { ScoreBar, formatDate, formatMoney } from '../../components/analyst/ui';
 import { FeatureTable, AnomalyContributors, ShapValues } from './FeatureBreakdown';
 import { Timeline } from './Timeline';
 import { FeedbackPanel } from './FeedbackPanel';
+import { NetworkGraph } from './NetworkGraph';
 
-type Tab = 'breakdown' | 'timeline';
+type Tab = 'breakdown' | 'timeline' | 'network';
 
 export function TxDetail() {
   const { id } = useParams<{ id: string }>();
@@ -49,7 +50,7 @@ export function TxDetail() {
         className={`mt-4 rounded-xl border p-5 text-white shadow-sm ${high ? 'border-red-700 bg-red-600' : 'border-orange-600 bg-orange-500'}`}
       >
         <p className="text-xs font-bold uppercase tracking-[0.16em] text-white/85">
-          {explain?.case_report?.verdict?.split(' — ')[0] ?? score.decision} · {score.risk_level} risk
+          {explain?.case_report?.verdict?.split(' — ')[0] ?? score.decision} · {score.risk_level} risk · {score.feature_mode ?? 'basic'} feature engine
         </p>
         <p className="mt-2 text-lg font-medium leading-6">
           {explain?.case_report?.verdict ?? `Scored ${score.decision} with ${score.fraud_probability * 100}% fraud probability.`}
@@ -78,9 +79,10 @@ export function TxDetail() {
         </div>
       </div>
 
-      <div className="mt-5 grid gap-4 sm:grid-cols-2">
+      <div className="mt-5 grid gap-4 sm:grid-cols-3">
         <ScoreBar value={score.fraud_probability} label="Fraud probability" />
         <ScoreBar value={score.anomaly_score} label="Anomaly score" />
+        <ScoreBar value={score.network_risk_score} label="Network risk" />
       </div>
 
       <div className="mt-6 grid gap-5 lg:grid-cols-2">
@@ -132,6 +134,7 @@ export function TxDetail() {
           {([
             ['breakdown', 'Feature Breakdown'],
             ['timeline', 'Transaction Timeline'],
+            ['network', 'Network'],
           ] as [Tab, string][]).map(([key, label]) => (
             <button
               key={key}
@@ -183,7 +186,7 @@ export function TxDetail() {
                 <FeatureTable features={score.features} />
               </div>
             </div>
-          ) : (
+          ) : tab === 'timeline' ? (
             <div className="grid gap-6 lg:grid-cols-[1fr_260px]">
               <Timeline txs={score.recent_transactions} currency={currency} />
               <aside className="rounded-xl border border-slate-100 bg-slate-50 p-4 text-sm text-slate-600">
@@ -195,6 +198,15 @@ export function TxDetail() {
                 </p>
               </aside>
             </div>
+          ) : (
+            <NetworkGraph
+              risk={score.network_risk_score}
+              available={score.network_available}
+              findings={score.network_findings}
+              features={score.network_features}
+              ego={score.network_ego}
+              community={score.network_community}
+            />
           )}
         </div>
       </section>

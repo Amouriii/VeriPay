@@ -12,6 +12,7 @@
 		200000000000000000000003 /* DemoStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000003 /* DemoStore.swift */; };
 		200000000000000000000004 /* DemoModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000004 /* DemoModels.swift */; };
 		200000000000000000000005 /* MockBankingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000005 /* MockBankingService.swift */; };
+		200000000000000000000011 /* LiveRiskService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000012 /* LiveRiskService.swift */; };
 		200000000000000000000006 /* VeriPayTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000006 /* VeriPayTheme.swift */; };
 		200000000000000000000007 /* SharedComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000007 /* SharedComponents.swift */; };
 		200000000000000000000008 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 300000000000000000000008 /* WelcomeView.swift */; };
@@ -42,6 +43,7 @@
 		30000000000000000000000E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		300000000000000000000010 /* AccountSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSelectionView.swift; sourceTree = "<group>"; };
 		300000000000000000000011 /* BiometricView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricView.swift; sourceTree = "<group>"; };
+		300000000000000000000012 /* LiveRiskService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveRiskService.swift; sourceTree = "<group>"; };
 		30000000000000000000000F /* VeriPayDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VeriPayDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -99,6 +101,7 @@
 			isa = PBXGroup;
 			children = (
 				300000000000000000000005 /* MockBankingService.swift */,
+				300000000000000000000012 /* LiveRiskService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -217,6 +220,7 @@
 				200000000000000000000003 /* DemoStore.swift in Sources */,
 				200000000000000000000004 /* DemoModels.swift in Sources */,
 				200000000000000000000005 /* MockBankingService.swift in Sources */,
+				200000000000000000000011 /* LiveRiskService.swift in Sources */,
 				200000000000000000000006 /* VeriPayTheme.swift in Sources */,
 				200000000000000000000007 /* SharedComponents.swift in Sources */,
 				200000000000000000000008 /* WelcomeView.swift in Sources */,

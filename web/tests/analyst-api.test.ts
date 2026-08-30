@@ -52,6 +52,37 @@ describe('/score', () => {
     expect(score.xgboost_feature_contributions[0]).toHaveProperty('shap_value');
   });
 
+  it('returns the network (graph) scoring axis on a high-risk fixture', async () => {
+    const res = await post('/score', { transaction_id: 'tx_9001' });
+    const score = await res.json();
+    expect(score.network_available).toBe(true);
+    expect(score.network_risk_score).toBeTypeOf('number');
+    expect(score.network_risk_score).toBeGreaterThan(0);
+    expect(score.network_findings.length).toBeGreaterThan(0);
+    expect(score.network_ego.nodes.length).toBeGreaterThan(0);
+    expect(score.network_ego.edges[0]).toHaveProperty('from');
+  });
+
+  it('reports network_available=false for an isolated fixture', async () => {
+    const res = await post('/score', { transaction_id: 'tx_9005' });
+    const score = await res.json();
+    expect(score.network_available).toBe(false);
+    expect(score.network_risk_score).toBe(0);
+  });
+
+  it('returns the full community payload for the fraud-ring fixture', async () => {
+    const res = await post('/score', { transaction_id: 'tx_9001' });
+    const score = await res.json();
+    expect(score.network_community).toBeDefined();
+    const comm = score.network_community;
+    expect(comm.stats.cluster_size).toBeGreaterThan(1);
+    expect(comm.stats.flagged_count).toBeGreaterThan(0);
+    expect(comm.stats.dominant_pattern).toBe('fraud_ring');
+    expect(comm.graph.nodes.length).toBeGreaterThan(0);
+    expect(comm.members.length).toBeGreaterThan(0);
+    expect(comm.members[0]).toHaveProperty('cc_num');
+  });
+
   it('looks up by cc_num too', async () => {
     const res = await post('/score', { cc_num: 4716561796955522 });
     expect(res.status).toBe(200);
@@ -81,6 +112,28 @@ describe('/customer/{cc_num}/profile', () => {
     expect(profile.recent_behavior).toHaveProperty('daily_txn_count');
     expect(profile.drift_detected).toHaveProperty('severity');
     expect(profile.trust_status).toHaveProperty('message');
+  });
+});
+
+describe('/customer/{cc_num}/network', () => {
+  it('returns the ego graph + community for a fraud-ring customer', async () => {
+    const res = await fetch(`${BASE}/customer/4716561796955522/network`);
+    expect(res.status).toBe(200);
+    const net = await res.json();
+    expect(net.cc_num).toBe(4716561796955522);
+    expect(net.available).toBe(true);
+    expect(net.network_risk_score).toBeGreaterThan(0);
+    expect(net.findings.length).toBeGreaterThan(0);
+    expect(net.ego.nodes.length).toBeGreaterThan(0);
+    expect(net.community.stats.dominant_pattern).toBe('fraud_ring');
+  });
+
+  it('returns available=false for an isolated customer', async () => {
+    const res = await fetch(`${BASE}/customer/4222222222222/network`);
+    expect(res.status).toBe(200);
+    const net = await res.json();
+    expect(net.available).toBe(false);
+    expect(net.network_risk_score).toBe(0);
   });
 });
 

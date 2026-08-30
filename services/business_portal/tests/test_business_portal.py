@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 
 from fastapi.testclient import TestClient
+from veripay_business_portal.auth import ConfigTokenAuthenticator
 from veripay_business_portal.main import create_app
 from veripay_business_portal.service import (
     BusinessPolicyView,
@@ -53,19 +54,34 @@ def test_business_portal_views() -> None:
             attempts=1,
         )
     )
-    client = TestClient(create_app(repository))
+    client = TestClient(
+        create_app(
+            repository,
+            authenticator=ConfigTokenAuthenticator({"t": frozenset({"BUSINESS_ADMIN"})}),
+        )
+    )
+    auth = {"Authorization": "Bearer t"}
     assert (
-        client.get("/api/v1/business/transactions?merchant_id=merchant-1").json()[0][
+        client.get("/api/v1/business/transactions?merchant_id=merchant-1", headers=auth).json()[0][
             "transaction_id"
         ]
         == "tx-1"
     )
-    assert client.get("/api/v1/business/spend/merchant-1").json()["remaining_minor"] == 750
-    assert len(client.get("/api/v1/business/policies").json()) == 1
-    assert client.get("/api/v1/business/webhooks").json()[0]["delivery_status"] == "DELIVERED"
+    assert (
+        client.get("/api/v1/business/spend/merchant-1", headers=auth).json()["remaining_minor"]
+        == 750
+    )
+    assert len(client.get("/api/v1/business/policies", headers=auth).json()) == 1
+    assert (
+        client.get("/api/v1/business/webhooks", headers=auth).json()[0]["delivery_status"]
+        == "DELIVERED"
+    )
     assert client.get("/api/v1/business/access-policy").json()["portal"] == "BUSINESS"
 
 
 def test_missing_spend_summary_is_not_found() -> None:
-    response = TestClient(create_app()).get("/api/v1/business/spend/missing")
+    client = TestClient(
+        create_app(authenticator=ConfigTokenAuthenticator({"t": frozenset({"BUSINESS_ADMIN"})}))
+    )
+    response = client.get("/api/v1/business/spend/missing", headers={"Authorization": "Bearer t"})
     assert response.status_code == 404

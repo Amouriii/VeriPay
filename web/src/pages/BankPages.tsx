@@ -40,7 +40,7 @@ export function BankDashboard() {
     <div className="mx-auto max-w-7xl px-6 py-8">
       <PageTitle
         eyebrow="BANK CONSOLE · 31 AUGUST 2026"
-        title="Good afternoon, Admin"
+        title="Welcome Back, Admin"
         detail="A clear view of today's payment risk."
       />
 
