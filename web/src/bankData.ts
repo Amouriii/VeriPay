@@ -20,6 +20,7 @@ export interface BankTransaction {
   reason: string;
 }
 
+
 export const bankTransactions: BankTransaction[] = [
   { id: 'TX-89231', customer: 'Customer #18492', merchant: 'Amazon', amount: 850, currency: 'USD', score: 89, level: 'HIGH', decision: 'VERIFY', verification: 'PENDING', status: 'VERIFICATION_REQUIRED', time: '09:42', channel: 'CARD_NOT_PRESENT', type: 'PURCHASE', location: 'Seattle, US', reason: 'New device' },
   { id: 'TX-89230', customer: 'Customer #77104', merchant: 'Northstar Travel', amount: 2340, currency: 'USD', score: 96, level: 'CRITICAL', decision: 'BLOCK', verification: 'FAILED', status: 'BLOCKED', time: '09:37', channel: 'CARD_NOT_PRESENT', type: 'PURCHASE', location: 'Bucharest, RO', reason: 'Unusual location' },
@@ -38,10 +39,172 @@ export const notifications = [
 ];
 
 export const customers = [
-  { id: 'CUS-18492', name: 'Customer #18492', email: 'c•••••@example.com', transactions: 148, volume: '$18,420', alerts: 3, risk: 'HIGH', account: 'ACTIVE' },
-  { id: 'CUS-77104', name: 'Customer #77104', email: 'j•••••@example.com', transactions: 62, volume: '$7,890', alerts: 1, risk: 'MEDIUM', account: 'ACTIVE' },
-  { id: 'CUS-40211', name: 'Customer #40211', email: 'm•••••@example.com', transactions: 231, volume: '$32,104', alerts: 0, risk: 'LOW', account: 'ACTIVE' },
-  { id: 'CUS-99518', name: 'Customer #99518', email: 'a•••••@example.com', transactions: 89, volume: '$14,201', alerts: 2, risk: 'MEDIUM', account: 'REVIEW' },
+  {
+    id: 'CUS-18492',
+    name: 'Customer #18492',
+    email: 'c•••••@example.com',
+    cardLast4: '4521',
+    transactions: 148,
+    volume: '$18,420',
+    alerts: 3,
+    risk: 'HIGH',
+    account: 'ACTIVE',
+
+    behavior: {
+      currency: 'USD',
+      averageAmount: '$124.50',
+      amountRange: '$35 - $450',
+      frequency: '3 - 5 transactions/day',
+      velocity: '1 - 2 transactions/hour',
+      normalTime: '12 PM - 8 PM',
+      location: 'New York · 82%',
+      device: 'iPhone 15 Pro · 72%',
+      category: 'Online shopping · 34%',
+    },
+  },
+
+  {
+    id: 'CUS-77104',
+    name: 'Customer #77104',
+    email: 'j•••••@example.com',
+    cardLast4: '0837',
+    transactions: 62,
+    volume: '$7,890',
+    alerts: 1,
+    risk: 'MEDIUM',
+    account: 'ACTIVE',
+
+    behavior: {
+      currency: 'USD',
+      averageAmount: '$186.30',
+      amountRange: '$50 - $900',
+      frequency: '1 - 3 transactions/day',
+      velocity: '1 transaction/hour',
+      normalTime: '8 AM - 6 PM',
+      location: 'Chicago · 76%',
+      device: 'iPhone 14 · 68%',
+      category: 'Travel · 41%',
+    },
+  },
+
+  {
+    id: 'CUS-40211',
+    name: 'Customer #40211',
+    email: 'm•••••@example.com',
+    cardLast4: '6310',
+    transactions: 231,
+    volume: '$32,104',
+    alerts: 0,
+    risk: 'LOW',
+    account: 'ACTIVE',
+
+    behavior: {
+      currency: 'USD',
+      averageAmount: '$74.20',
+      amountRange: '$15 - $180',
+      frequency: '5 - 8 transactions/day',
+      velocity: '2 - 3 transactions/hour',
+      normalTime: '10 AM - 9 PM',
+      location: 'Austin · 91%',
+      device: 'iPhone 15 · 81%',
+      category: 'Groceries · 32%',
+    },
+  },
+
+  {
+    id: 'CUS-99518',
+    name: 'Customer #99518',
+    email: 'a•••••@example.com',
+    cardLast4: '1198',
+    transactions: 89,
+    volume: '$14,201',
+    alerts: 2,
+    risk: 'MEDIUM',
+    account: 'REVIEW',
+
+    behavior: {
+      currency: 'USD',
+      averageAmount: '$159.60',
+      amountRange: '$30 - $500',
+      frequency: '2 - 4 transactions/day',
+      velocity: '1 - 2 transactions/hour',
+      normalTime: '9 AM - 7 PM',
+      location: 'Boston · 79%',
+      device: 'MacBook Pro · 64%',
+      category: 'Software & subscriptions · 38%',
+    },
+  },
+    {
+    id: 'CUS-23017',
+    name: 'Customer #23017',
+    email: 'r•••••@example.com',
+    cardLast4: '7742',
+    transactions: 174,
+    volume: '$11,680',
+    alerts: 0,
+    risk: 'LOW',
+    account: 'ACTIVE',
+
+    behavior: {
+      currency: 'USD',
+      averageAmount: '$68.40',
+      amountRange: '$20 - $160',
+      frequency: '4 - 6 transactions/day',
+      velocity: '1 - 2 transactions/hour',
+      normalTime: '7 AM - 8 PM',
+      location: 'Chicago · 88%',
+      device: 'iPhone 14 · 75%',
+      category: 'Fuel & transportation · 29%',
+    },
+  },
+
+  {
+    id: 'CUS-65420',
+    name: 'Customer #65420',
+    email: 'd•••••@example.com',
+    cardLast4: '2904',
+    transactions: 96,
+    volume: '$21,540',
+    alerts: 2,
+    risk: 'HIGH',
+    account: 'REVIEW',
+
+    behavior: {
+      currency: 'USD',
+      averageAmount: '$215.80',
+      amountRange: '$40 - $700',
+      frequency: '2 - 4 transactions/day',
+      velocity: '1 transaction/hour',
+      normalTime: '9 AM - 6 PM',
+      location: 'Denver · 83%',
+      device: 'MacBook Air · 61%',
+      category: 'Electronics · 27%',
+    },
+  },
+
+  {
+    id: 'CUS-50911',
+    name: 'Customer #50911',
+    email: 's•••••@example.com',
+    cardLast4: '5168',
+    transactions: 113,
+    volume: '$16,870',
+    alerts: 1,
+    risk: 'MEDIUM',
+    account: 'ACTIVE',
+
+    behavior: {
+      currency: 'USD',
+      averageAmount: '$92.70',
+      amountRange: '$25 - $240',
+      frequency: '2 - 5 transactions/day',
+      velocity: '1 - 2 transactions/hour',
+      normalTime: '8 AM - 7 PM',
+      location: 'Miami · 86%',
+      device: 'iPhone 13 · 70%',
+      category: 'Health & pharmacy · 31%',
+    },
+  },
 ];
 
 export const merchants = [

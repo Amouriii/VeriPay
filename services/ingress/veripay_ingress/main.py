@@ -25,7 +25,11 @@ def create_app(repository: TransactionRepository | None = None) -> FastAPI:
     def health() -> dict[str, str]:
         return {"status": "ok", "service": "veripay-ingress"}
 
-    @app.get("/api/v1/transactions", response_model=list[Transaction])
+    @app.get(
+        "/api/v1/transactions",
+        response_model=list[Transaction],
+        response_model_exclude_none=True,
+    )
     def list_transactions() -> list[Transaction]:
         return transaction_repository.list()
 

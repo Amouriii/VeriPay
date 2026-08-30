@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from pydantic import BaseModel, Field, model_validator
-from veripay_common.enums import RiskBand
+from veripay_common.enums import RiskBand, RiskTier
+from veripay_common.risk_policy import band_for_tier, tier_for_score
 
 
 class RiskComponent(BaseModel):
@@ -29,6 +30,7 @@ class FusionResponse(BaseModel):
     transaction_id: str
     unified_score: int = Field(ge=0, le=100)
     band: RiskBand
+    tier: RiskTier
     components: list[RiskComponent]
 
 
@@ -41,10 +43,11 @@ def fuse_risk(request: FusionRequest) -> FusionResponse:
         total_weight = sum(component.weight for component in available)
         weighted_score = sum(component.score * component.weight for component in available)
         score = round(weighted_score / total_weight)
-    band = RiskBand.APPROVE if score < 40 else RiskBand.VERIFY if score < 70 else RiskBand.BLOCK
+    tier = tier_for_score(score)
     return FusionResponse(
         transaction_id=request.transaction_id,
         unified_score=score,
-        band=band,
+        band=band_for_tier(tier),
+        tier=tier,
         components=request.components,
     )

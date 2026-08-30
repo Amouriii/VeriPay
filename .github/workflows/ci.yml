@@ -63,6 +63,9 @@ jobs:
       - name: eslint
         run: npm run lint
         working-directory: web
+      - name: tsc --noEmit
+        run: npx tsc --noEmit
+        working-directory: web
 
   # ----------------------------------------------------------- ingress -----
   ingress:

@@ -2,10 +2,24 @@
 
 from __future__ import annotations
 
-# --- Risk bands (PLAN §7) ---
-RISK_SCORE_APPROVE_MAX = 30  # 0-30 => APPROVE
-RISK_SCORE_VERIFY_MAX = 80  # 31-80 => VERIFY/REVIEW
-RISK_SCORE_BLOCK_MAX = 100  # 81-100 => BLOCK/REVERSE
+# --- Operational risk tiers (blueprint §4) ---
+RISK_TIER_NO_RISK_MAX = 5
+RISK_TIER_LOW_MAX = 25
+RISK_TIER_MODERATE_MAX = 50
+RISK_TIER_HIGH_MAX = 100
+
+# Legacy RiskBand projections retained for migration compatibility.
+RISK_SCORE_APPROVE_MAX = 25  # 0-25 => APPROVE projection
+RISK_SCORE_VERIFY_MAX = 50  # 26-50 => VERIFY projection
+RISK_SCORE_BLOCK_MAX = 100  # 51-100 => BLOCK projection
+
+# --- Dual-latency processing budgets (blueprint §3) ---
+FAST_PATH_DEADLINE_MS = 500
+FAST_PATH_ML_BUDGET_MS = 50
+SECONDARY_PATH_DEADLINE_MS = 5_000
+VERIFICATION_TOKEN_MIN_TTL_SEC = 10
+VERIFICATION_TOKEN_MAX_TTL_SEC = 30
+DEFAULT_VERIFICATION_TOKEN_TTL_SEC = 30
 
 # --- GPV distance classification (PLAN §14) ---
 GPV_MATCH_MAX_M = 100.0

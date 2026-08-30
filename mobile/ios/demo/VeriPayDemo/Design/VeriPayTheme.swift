@@ -1,61 +1,33 @@
 import SwiftUI
 
 enum VeriPayTheme {
-  static let indigo = Color(red: 0.24, green: 0.23, blue: 0.86)
-  static let violet = Color(red: 0.49, green: 0.31, blue: 0.96)
-  static let cyan = Color(red: 0.18, green: 0.78, blue: 0.86)
+  // Product palette: institutional surfaces with role-specific accents.
+  static let obsidian = Color(red: 0.043, green: 0.075, blue: 0.122)
+  static let polarWhite = Color(red: 0.980, green: 0.980, blue: 0.988)
+  static let coolGray = Color(red: 0.941, green: 0.953, blue: 0.969)
+  static let charcoal = Color(red: 0.200, green: 0.227, blue: 0.282)
+  static let indigo = Color(red: 0.310, green: 0.275, blue: 0.898)
+  static let steelBlue = Color(red: 0.008, green: 0.518, blue: 0.780)
+  static let violet = indigo
+  static let cyan = steelBlue
   static let success = Color(red: 0.10, green: 0.66, blue: 0.43)
   static let warning = Color(red: 0.95, green: 0.57, blue: 0.18)
   static let danger = Color(red: 0.91, green: 0.24, blue: 0.33)
 
-  static let background = Color(
-    UIColor { traits in
-      traits.userInterfaceStyle == .dark
-        ? UIColor(red: 0.035, green: 0.045, blue: 0.085, alpha: 1)
-        : UIColor(red: 0.958, green: 0.969, blue: 0.992, alpha: 1)
-    }
-  )
-
-  static let surface = Color(
-    UIColor { traits in
-      traits.userInterfaceStyle == .dark
-        ? UIColor(red: 0.075, green: 0.09, blue: 0.15, alpha: 1)
-        : UIColor.white
-    }
-  )
-
-  static let secondarySurface = Color(
-    UIColor { traits in
-      traits.userInterfaceStyle == .dark
-        ? UIColor(red: 0.105, green: 0.12, blue: 0.19, alpha: 1)
-        : UIColor(red: 0.925, green: 0.94, blue: 0.975, alpha: 1)
-    }
-  )
-
-  static let primaryText = Color(
-    UIColor { traits in
-      traits.userInterfaceStyle == .dark
-        ? UIColor.white
-        : UIColor(red: 0.055, green: 0.07, blue: 0.13, alpha: 1)
-    }
-  )
-
-  static let secondaryText = Color(
-    UIColor { traits in
-      traits.userInterfaceStyle == .dark
-        ? UIColor(red: 0.68, green: 0.71, blue: 0.79, alpha: 1)
-        : UIColor(red: 0.37, green: 0.40, blue: 0.48, alpha: 1)
-    }
-  )
+  static let background = polarWhite
+  static let surface = polarWhite
+  static let secondarySurface = coolGray
+  static let primaryText = charcoal
+  static let secondaryText = Color(red: 0.290, green: 0.322, blue: 0.388)
 
   static let cardGradient = LinearGradient(
-    colors: [Color(red: 0.10, green: 0.12, blue: 0.29), indigo, violet],
+    colors: [obsidian, indigo, steelBlue],
     startPoint: .topLeading,
     endPoint: .bottomTrailing
   )
 
   static let brandGradient = LinearGradient(
-    colors: [indigo, violet],
+    colors: [indigo, steelBlue],
     startPoint: .leading,
     endPoint: .trailing
   )

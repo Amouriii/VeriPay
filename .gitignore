@@ -7,10 +7,12 @@ __pycache__/
 .mypy_cache/
 dist/
 build/
+.build/
 mobile/ios/.build/
 *.egg-info/
 node_modules/
 web/dist/
+web/tsconfig.tsbuildinfo
 .idea/
 .vscode/
 .DS_Store

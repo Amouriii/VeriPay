@@ -5,9 +5,17 @@ package veripay.risk.v1;
 
 enum RiskBand {
   RISK_BAND_UNSPECIFIED = 0;
-  RISK_BAND_APPROVE = 1;      // 0-30
-  RISK_BAND_VERIFY = 2;       // 31-80
-  RISK_BAND_BLOCK = 3;        // 81-100
+  RISK_BAND_APPROVE = 1;      // legacy projection: 0-25
+  RISK_BAND_VERIFY = 2;       // legacy projection: 26-50
+  RISK_BAND_BLOCK = 3;        // legacy projection: 51-100
+}
+
+enum RiskTier {
+  RISK_TIER_UNSPECIFIED = 0;
+  RISK_TIER_NO_RISK = 1;      // 0-5%
+  RISK_TIER_LOW = 2;          // >5-25%
+  RISK_TIER_MODERATE = 3;     // >25-50%
+  RISK_TIER_HIGH = 4;         // >50-100%
 }
 
 message ComponentScore {
@@ -20,9 +28,10 @@ message ComponentScore {
 
 message RiskScore {
   string transaction_id = 1;
-  int32 unified_score = 2;        // 0-100
-  RiskBand band = 3;
+  int32 unified_score = 2;        // 0-100 percentage score
+  RiskBand band = 3;              // legacy compatibility projection
   repeated ComponentScore components = 4;
+  RiskTier tier = 5;              // operational risk-gating tier
 }
 
 message FuseRequest {
