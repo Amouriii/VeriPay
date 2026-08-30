@@ -24,3 +24,5 @@ export interface ShapAttributionDto {
   shapValue: number;
   direction: 'increases' | 'decreases';
 }
+
+export * from './analyst';
