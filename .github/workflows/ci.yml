@@ -348,6 +348,49 @@ jobs:
         run: npm test -- --run
         working-directory: web
 
+  # ------------------------------------------------------------ vercel ------
+  vercel-build:
+    name: Vercel build (web)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install web deps
+        run: npm ci || npm install
+        working-directory: web
+      # Token-free guard: vercel.json must stay schema-valid and must NOT carry
+      # rootDirectory (it is a Vercel project setting, not a vercel.json key —
+      # the schema rejects it and every deployment fails).
+      - name: Validate vercel.json
+        run: |
+          python3 -c "
+          import json
+          cfg = json.load(open('vercel.json'))
+          assert 'rootDirectory' not in cfg, \
+              'rootDirectory is a Vercel project setting; vercel.json schema rejects it'
+          for key in ('framework', 'buildCommand', 'outputDirectory'):
+              assert key in cfg, f'vercel.json is missing {key}'
+          print('vercel.json OK')
+          "
+      # Full-fidelity check: pull the real project settings (rootDirectory=web,
+      # framework=vite) and run the actual Vercel build pipeline. Needs the
+      # VERCEL_TOKEN repository secret; until it is added the step reports a
+      # skip so CI stays green.
+      - name: Vercel build (project settings incl. rootDirectory)
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "VERCEL_TOKEN not configured; vercel.json validated above (full build skipped)."
+            exit 0
+          fi
+          npx --yes vercel pull --yes --environment=preview --token="$VERCEL_TOKEN" --project=veri-pay
+          npx --yes vercel build --token="$VERCEL_TOKEN"
+
   # ----------------------------------------------------------- security -----
   secret-scan:
     name: Secret scan (gitleaks)

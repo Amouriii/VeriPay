@@ -142,7 +142,17 @@ repo root.
 project's environment variables. Left unset, the dashboard falls back to the
 MSW mocks and the analyst console to its mock handlers.
 
+### CI regression check
+
+`.github/workflows/ci.yml` has a `vercel-build` job that (1) statically
+validates `vercel.json` (schema-valid, no `rootDirectory` key) and (2) runs
+the real `vercel pull` + `vercel build` pipeline against the `veri-pay`
+project so framework/rootDirectory changes are caught in CI, not at deploy
+time. Step (2) requires the `VERCEL_TOKEN` repository secret; without it the
+step reports a skip and only the static validation runs.
+
 ### Inspecting deployments
+
 
 ```bash
 npx vercel whoami              # must print your account
