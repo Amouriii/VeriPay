@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import {
   activityEvents,
@@ -171,32 +171,77 @@ function AccountRow({
 }: {
   account: (typeof customerAccounts)[number];
 }) {
+  const details = [
+    { label: 'Card number', value: `•••• •••• •••• ${account.last4}` },
+    { label: 'Account type', value: account.type },
+    { label: 'Available balance', value: money(account.balance) },
+    { label: 'Security status', value: 'Protected · Active' },
+  ];
+  const [detailIndex, setDetailIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [masked, setMasked] = useState(true);
+  const [cardSeed, setCardSeed] = useState(0);
+  const hiddenNumber = '•••• •••• •••• ••••';
+  const visibleNumber = `•••• •••• ${String(1000 + ((Number(account.last4) + cardSeed * 137) % 9000)).padStart(4, '0')} ${account.last4}`;
+  const visibleCvv = String(100 + ((Number(account.last4) + cardSeed * 53) % 900));
+  const cardNumber = masked ? hiddenNumber : visibleNumber;
+  const cvv = masked ? '•••' : visibleCvv;
+
+  useEffect(() => {
+    if (paused) return;
+    const timer = window.setInterval(() => {
+      setDetailIndex((current) => (current + 1) % details.length);
+      setCardSeed((current) => current + 1);
+    }, 1800);
+    return () => window.clearInterval(timer);
+  }, [paused, details.length]);
+
+  const current = details[detailIndex];
+
   return (
-    <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex min-w-0 items-center gap-4">
-        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#edf7f6] text-[#087f7a]">
-          <Icon name="card" />
+    <div className="p-4 sm:p-5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-4">
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[#edf7f6] text-[#087f7a]">
+            <Icon name="card" />
+          </div>
+          <div className="min-w-0">
+            <p className="font-semibold text-[#17324d]">{account.name}</p>
+            <p className="mt-1 text-xs text-[#718294]">Privacy card · number and CVV rotate every 1.8 seconds</p>
+          </div>
         </div>
-        <div className="min-w-0">
-          <p className="font-semibold text-[#17324d]">{account.name}</p>
-          <p className="mt-1 text-xs text-[#718294]">
-            •••• {account.last4} · {account.type}
-          </p>
-        </div>
+        <span className="rounded-full bg-[#e9f7f1] px-2.5 py-1 text-[10px] font-bold text-[#087a5e]">Active</span>
       </div>
 
-      <div className="flex items-center justify-between gap-6 sm:justify-end">
-        <div className="text-left sm:text-right">
-          <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#8a99a6]">
-            Available
-          </p>
-          <p className="mt-1 text-xl font-semibold tracking-tight text-[#17324d]">
-            {money(account.balance)}
-          </p>
+      <div className="mt-4 rounded-2xl bg-gradient-to-br from-[#17324d] via-[#245d71] to-[#087f7a] p-5 text-white shadow-[0_12px_30px_rgba(23,50,77,0.2)]">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/65">{account.name}</p>
+            <p className="mt-5 font-mono text-lg tracking-[0.14em]" aria-label="Rotating masked card number">{cardNumber}</p>
+          </div>
+          <Icon name="shield" size={22} />
         </div>
-        <span className="rounded-full bg-[#e9f7f1] px-2.5 py-1 text-[10px] font-bold text-[#087a5e]">
-          Active
-        </span>
+        <div className="mt-5 flex min-h-[54px] items-end justify-between gap-4 border-t border-white/15 pt-3">
+          <div className="transition-opacity duration-300" aria-live="polite">
+            <p className="text-[10px] uppercase tracking-[0.16em] text-white/60">{current.label}</p>
+            <p className="mt-1 text-sm font-semibold">{current.value}</p>
+          </div>
+          <div className="text-right" aria-live="polite">
+            <p className="text-[10px] uppercase tracking-[0.16em] text-white/60">CVV</p>
+            <p className="mt-1 font-mono text-sm font-semibold tracking-[0.18em]">{cvv}</p>
+          </div>
+          <div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row sm:items-center">
+            <button type="button" onClick={() => setMasked((value) => !value)} aria-pressed={masked} className="rounded-lg border border-white/25 px-2.5 py-1.5 text-[10px] font-bold text-white/90 transition hover:bg-white/10" aria-label={`${masked ? 'Show' : 'Hide'} full card number and CVV`}>
+              {masked ? 'Show details' : 'Mask card'}
+            </button>
+            <button type="button" onClick={() => setPaused((value) => !value)} className="rounded-lg border border-white/25 px-2.5 py-1.5 text-[10px] font-bold text-white/90 transition hover:bg-white/10" aria-label={`${paused ? 'Resume' : 'Pause'} card information rotation`}>
+              {paused ? 'Resume rotation' : 'Pause rotation'}
+            </button>
+          </div>
+        </div>
+        <div className="mt-3 flex gap-1.5" aria-label="Card information rotation status">
+          {details.map((detail, index) => <span key={detail.label} className={`h-1 rounded-full transition-all ${index === detailIndex ? 'w-6 bg-white' : 'w-2 bg-white/35'}`} />)}
+        </div>
       </div>
     </div>
   );
@@ -870,14 +915,32 @@ export function CustomerTransactionDetail() {
     customerTransactions.find((item) => item.id === id) ??
     customerTransactions[0];
 
-  const [verification, setVerification] = useState<
-    'idle' | 'approved' | 'denied'
-  >(
-    transaction.status === 'Verification Required' ||
-      transaction.status === 'Blocked'
-      ? 'idle'
-      : 'approved'
+  type VerificationState = 'idle' | 'method' | 'processing' | 'approved' | 'denied';
+  type VerificationMethod = 'push' | 'sms' | 'email' | 'biometric';
+  const [verification, setVerification] = useState<VerificationState>(
+    transaction.status === 'Verification Required' || transaction.status === 'Blocked' ? 'idle' : 'approved',
   );
+  const [method, setMethod] = useState<VerificationMethod | null>(null);
+  const [code, setCode] = useState('');
+  const [attempts, setAttempts] = useState(0);
+
+  const startVerification = (selected: VerificationMethod) => {
+    setMethod(selected);
+    setCode('');
+    setAttempts(0);
+    setVerification('processing');
+    window.setTimeout(() => setVerification('method'), 500);
+  };
+
+  const completeVerification = () => {
+    if (method === 'sms' || method === 'email') {
+      if (code.trim() !== '246810') {
+        setAttempts((value) => value + 1);
+        return;
+      }
+    }
+    setVerification('approved');
+  };
 
   const unusual =
     transaction.status === 'Verification Required' ||
@@ -972,26 +1035,44 @@ export function CustomerTransactionDetail() {
 
             {verification === 'idle' && (
               <div className="mt-6 grid gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => setVerification('approved')}
-                  className="w-full rounded-xl bg-[#087f7a] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#066c68]"
-                >
-                  Yes, I recognize it
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setVerification('denied')}
-                  className="w-full rounded-xl border border-[#e7b9b4] bg-white px-4 py-3 text-sm font-semibold text-[#a9433d] transition hover:bg-[#fff7f6]"
-                >
-                  No, this is not mine
-                </button>
+                <button type="button" onClick={() => setVerification('method')} className="w-full rounded-xl bg-[#087f7a] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#066c68]">Verify this transaction</button>
+                <button type="button" onClick={() => setVerification('denied')} className="w-full rounded-xl border border-[#e7b9b4] bg-white px-4 py-3 text-sm font-semibold text-[#a9433d] transition hover:bg-[#fff7f6]">No, this is not mine</button>
               </div>
+            )}
+
+            {verification === 'processing' && <div className="mt-6 rounded-xl bg-white p-4 text-sm font-semibold text-[#76664a]">Preparing a secure verification request…</div>}
+
+            {verification === 'method' && (
+              <div className="mt-6 space-y-3">
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#9a6700]">Choose a secure method</p>
+                {([
+                  ['push', 'Push notification', 'Approve from a trusted device'],
+                  ['sms', 'SMS code', 'Send a one-time code to •••• 4421'],
+                  ['email', 'Email confirmation', 'Send a secure link to j•••••@example.com'],
+                  ['biometric', 'Biometric approval', 'Confirm with Face ID or fingerprint'],
+                ] as [VerificationMethod, string, string][]).map(([value, title, detail]) => (
+                  <button key={value} type="button" onClick={() => startVerification(value)} className="flex w-full items-center justify-between rounded-xl border border-[#eadfbc] bg-white p-3 text-left transition hover:border-[#087f7a] hover:bg-[#f7fffd]">
+                    <span><span className="block text-sm font-semibold text-[#3e3524]">{title}</span><span className="mt-0.5 block text-xs text-[#76664a]">{detail}</span></span><span className="text-lg text-[#087f7a]">→</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {verification === 'method' && method && (method === 'sms' || method === 'email') && (
+              <div className="mt-4 rounded-xl border border-[#dce7e9] bg-white p-4">
+                <label className="block text-xs font-bold uppercase tracking-[0.12em] text-[#718294]">One-time code <input value={code} onChange={(event) => setCode(event.target.value)} inputMode="numeric" maxLength={6} className="mt-2 block w-full rounded-lg border border-[#dce7e9] px-3 py-2 text-base tracking-[0.3em] outline-none focus:border-[#087f7a]" placeholder="246810" /></label>
+                {attempts > 0 && <p className="mt-2 text-xs font-semibold text-[#b44a43]">That code did not match. Demo code: 246810.</p>}
+                <div className="mt-3 flex gap-2"><button type="button" onClick={completeVerification} className="rounded-lg bg-[#087f7a] px-3 py-2 text-xs font-bold text-white">Confirm code</button><button type="button" onClick={() => setVerification('method')} className="rounded-lg border border-[#dce7e9] px-3 py-2 text-xs font-bold text-[#53687b]">Resend code</button></div>
+              </div>
+            )}
+
+            {verification === 'method' && method && (method === 'push' || method === 'biometric') && (
+              <div className="mt-4 rounded-xl border border-[#dce7e9] bg-white p-4"><p className="text-sm font-semibold text-[#3e3524]">{method === 'push' ? 'Check your trusted device' : 'Confirm your identity'}</p><p className="mt-1 text-xs leading-5 text-[#76664a]">{method === 'push' ? 'A secure approval request was sent to your iPhone 15 Pro.' : 'Use your device biometric sensor to approve this transaction.'}</p><button type="button" onClick={completeVerification} className="mt-3 rounded-lg bg-[#087f7a] px-3 py-2 text-xs font-bold text-white">{method === 'push' ? 'Approve on device' : 'Use biometric approval'}</button></div>
             )}
 
             {verification === 'approved' && (
               <div className="mt-6 rounded-xl bg-[#e9f7f1] p-4 text-sm font-semibold text-[#087a5e]">
-                Transaction approved.
+                Transaction approved securely{method ? ` with ${method === 'sms' ? 'SMS code' : method === 'email' ? 'email confirmation' : method === 'push' ? 'push notification' : 'biometric approval'}` : ''}.
               </div>
             )}
 
