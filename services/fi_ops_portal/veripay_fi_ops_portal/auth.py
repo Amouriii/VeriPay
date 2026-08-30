@@ -96,7 +96,7 @@ def extract_bearer_token(authorization: str | None) -> str:
 def require_roles(
     authorization: str | None,
     authenticator: TokenAuthenticator,
-    required_roles: set[str],
+    required_roles: set[str] | frozenset[str],
 ) -> AuthIdentity:
     """Authenticate the request and enforce at least one required role.
 
