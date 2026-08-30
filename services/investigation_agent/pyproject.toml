@@ -10,6 +10,11 @@ dependencies = [
     "veripay-common",
 ]
 
+[project.optional-dependencies]
+llm = [
+    "openai>=1.30",
+]
+
 [project.scripts]
 veripay-investigation_agent = "veripay_investigation_agent.main:main"
 

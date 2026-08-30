@@ -1,110 +1,233 @@
 # All VeriPay backend services. Toggle by commenting out as needed during dev.
-# Each service image is built from services/<name>/Dockerfile.
+# Each service image is built from its Dockerfile using the REPOSITORY ROOT as
+# the build context, because each Dockerfile installs the local veripay-common
+# dependency from source (../../ from this directory is the repo root).
+#
+# Every backend runs uvicorn on 8000 with a /health route; the shared
+# healthcheck below probes it with Python's stdlib (no curl required in the
+# slim base image) so `depends_on.*.condition: service_healthy` gates startup.
 include:
   - kafka.yml
   - redis.yml
   - postgres.yml
 
+x-backend-healthcheck: &backend-healthcheck
+  test:
+    - CMD
+    - python
+    - -c
+    - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5).close()"
+  interval: 10s
+  timeout: 5s
+  retries: 6
+  start_period: 30s
+
 services:
   ingress:
-    build: ../../services/ingress
+    build:
+      context: ../..
+      dockerfile: services/ingress/Dockerfile
     ports: ["8001:8000"]
     env_file: [.env]
-    depends_on: [kafka, postgres]
+    healthcheck: *backend-healthcheck
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
   token_vault:
-    build: ../../services/token_vault
+    build:
+      context: ../..
+      dockerfile: services/token_vault/Dockerfile
     ports: ["8002:8000"]
     env_file: [.env]
+    healthcheck: *backend-healthcheck
   audit_store:
-    build: ../../services/audit_store
+    build:
+      context: ../..
+      dockerfile: services/audit_store/Dockerfile
     ports: ["8003:8000"]
     env_file: [.env]
-    depends_on: [postgres]
+    healthcheck: *backend-healthcheck
+    depends_on:
+      postgres:
+        condition: service_healthy
   feature_store:
-    build: ../../services/feature_store
+    build:
+      context: ../..
+      dockerfile: services/feature_store/Dockerfile
     ports: ["8004:8000"]
     env_file: [.env]
-    depends_on: [redis]
+    healthcheck: *backend-healthcheck
+    depends_on:
+      redis:
+        condition: service_healthy
   rule_engine:
-    build: ../../services/rule_engine
+    build:
+      context: ../..
+      dockerfile: services/rule_engine/Dockerfile
     ports: ["8005:8000"]
     env_file: [.env]
+    healthcheck: *backend-healthcheck
   supervised_model:
-    build: ../../services/supervised_model
+    build:
+      context: ../..
+      dockerfile: services/supervised_model/Dockerfile
     ports: ["8006:8000"]
     env_file: [.env]
+    healthcheck: *backend-healthcheck
+    environment:
+      MODEL_PATH: /ml/models/supervised/latest
+    volumes: ["../../ml/models:/ml/models:ro"]
   anomaly_model:
-    build: ../../services/anomaly_model
+    build:
+      context: ../..
+      dockerfile: services/anomaly_model/Dockerfile
     ports: ["8007:8000"]
     env_file: [.env]
+    healthcheck: *backend-healthcheck
+    environment:
+      MODEL_PATH: /ml/models/anomaly/latest
+    volumes: ["../../ml/models:/ml/models:ro"]
   graph_engine:
-    build: ../../services/graph_engine
+    build:
+      context: ../..
+      dockerfile: services/graph_engine/Dockerfile
     ports: ["8008:8000"]
     env_file: [.env]
+    healthcheck: *backend-healthcheck
   financial_context:
-    build: ../../services/financial_context
+    build:
+      context: ../..
+      dockerfile: services/financial_context/Dockerfile
     ports: ["8009:8000"]
     env_file: [.env]
+    healthcheck: *backend-healthcheck
   external_context:
-    build: ../../services/external_context
+    build:
+      context: ../..
+      dockerfile: services/external_context/Dockerfile
     ports: ["8010:8000"]
     env_file: [.env]
+    healthcheck: *backend-healthcheck
   device_integrity:
-    build: ../../services/device_integrity
+    build:
+      context: ../..
+      dockerfile: services/device_integrity/Dockerfile
     ports: ["8011:8000"]
     env_file: [.env]
+    healthcheck: *backend-healthcheck
   risk_fusion:
-    build: ../../services/risk_fusion
+    build:
+      context: ../..
+      dockerfile: services/risk_fusion/Dockerfile
     ports: ["8012:8000"]
     env_file: [.env]
+    healthcheck: *backend-healthcheck
   decision_engine:
-    build: ../../services/decision_engine
+    build:
+      context: ../..
+      dockerfile: services/decision_engine/Dockerfile
     ports: ["8013:8000"]
     env_file: [.env]
+    healthcheck: *backend-healthcheck
   investigation_agent:
-    build: ../../services/investigation_agent
+    build:
+      context: ../..
+      dockerfile: services/investigation_agent/Dockerfile
     ports: ["8014:8000"]
     env_file: [.env]
+    healthcheck: *backend-healthcheck
   auth_orchestration:
-    build: ../../services/auth_orchestration
+    build:
+      context: ../..
+      dockerfile: services/auth_orchestration/Dockerfile
     ports: ["8015:8000"]
     env_file: [.env]
+    healthcheck: *backend-healthcheck
   feedback_loop:
-    build: ../../services/feedback_loop
+    build:
+      context: ../..
+      dockerfile: services/feedback_loop/Dockerfile
     ports: ["8016:8000"]
     env_file: [.env]
+    healthcheck: *backend-healthcheck
   # --- Expansion: Banking/FI + Business/Merchant services ---
   banking_gateway:
-    build: ../../services/banking_gateway
+    build:
+      context: ../..
+      dockerfile: services/banking_gateway/Dockerfile
     ports: ["8017:8000"]
     env_file: [.env]
-    depends_on: [kafka, postgres]
+    healthcheck: *backend-healthcheck
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
   merchant_ingress:
-    build: ../../services/merchant_ingress
+    build:
+      context: ../..
+      dockerfile: services/merchant_ingress/Dockerfile
     ports: ["8018:8000"]
     env_file: [.env]
+    healthcheck: *backend-healthcheck
   merchant_policy:
-    build: ../../services/merchant_policy
+    build:
+      context: ../..
+      dockerfile: services/merchant_policy/Dockerfile
     ports: ["8019:8000"]
     env_file: [.env]
+    healthcheck: *backend-healthcheck
   dispute_engine:
-    build: ../../services/dispute_engine
+    build:
+      context: ../..
+      dockerfile: services/dispute_engine/Dockerfile
     ports: ["8020:8000"]
     env_file: [.env]
-    depends_on: [postgres]
+    healthcheck: *backend-healthcheck
+    depends_on:
+      postgres:
+        condition: service_healthy
   compliance_engine:
-    build: ../../services/compliance_engine
+    build:
+      context: ../..
+      dockerfile: services/compliance_engine/Dockerfile
     ports: ["8021:8000"]
     env_file: [.env]
+    healthcheck: *backend-healthcheck
   fi_ops_portal:
-    build: ../../services/fi_ops_portal
+    build:
+      context: ../..
+      dockerfile: services/fi_ops_portal/Dockerfile
     ports: ["8022:8000"]
     env_file: [.env]
+    healthcheck: *backend-healthcheck
   business_portal:
-    build: ../../services/business_portal
+    build:
+      context: ../..
+      dockerfile: services/business_portal/Dockerfile
     ports: ["8023:8000"]
     env_file: [.env]
+    healthcheck: *backend-healthcheck
   corporate_spend:
-    build: ../../services/corporate_spend
+    build:
+      context: ../..
+      dockerfile: services/corporate_spend/Dockerfile
     ports: ["8024:8000"]
     env_file: [.env]
+    healthcheck: *backend-healthcheck
+  model_monitor:
+    build:
+      context: ../..
+      dockerfile: services/model_monitor/Dockerfile
+    ports: ["8025:8000"]
+    env_file: [.env]
+    healthcheck: *backend-healthcheck
+    environment:
+      MODEL_DIR: /ml/models
+      MODEL_REGISTRY: /ml/models/registry.json
+      BASE_DATASET: /datasets/synthetic/transactions_labeled.csv
+    volumes:
+      - "../../ml/models:/ml/models:ro"
+      - "../../datasets:/datasets:ro"

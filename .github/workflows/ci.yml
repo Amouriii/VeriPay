@@ -180,6 +180,7 @@ jobs:
           - dispute_engine
           - fi_ops_portal
           - business_portal
+          - model_monitor
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -240,6 +241,52 @@ jobs:
       - name: Validate combined stack
         run: docker compose -f infra/compose/docker-compose.dev.yml -f infra/compose/services.yml config --quiet
 
+  # ----------------------------------------------------------- compose-build -----
+  compose-build:
+    name: Compose build smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare local Compose environment
+        run: touch infra/compose/.env
+      - name: Hadolint Dockerfile lint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          failure-threshold: warning
+          no-color: true
+      - name: Build representative services (plain, ML, LLM Dockerfile variants)
+        run: docker compose -f infra/compose/services.yml build ingress supervised_model investigation_agent
+      - name: Confirm images were produced
+        run: |
+          compose_file=infra/compose/services.yml
+          project="$(docker compose -f "$compose_file" config | sed -n 's/^name: *//p')"
+          for svc in ingress supervised_model investigation_agent; do
+            docker image ls --format '{{.Repository}}' | grep -qF "${project}-${svc}" \
+              || { echo "missing image ${project}-${svc}"; exit 1; }
+          done
+          echo "compose build smoke test OK (project: ${project})"
+
+  # ---------------------------------------------------------- compose-smoke -----
+  compose-smoke:
+    name: Compose live HTTP smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare local Compose environment
+        run: touch infra/compose/.env
+      - name: Build representative chain images
+        run: >-
+          docker compose -f infra/compose/services.yml build
+          rule_engine supervised_model anomaly_model risk_fusion
+          decision_engine investigation_agent
+      - name: Start representative chain
+        run: >-
+          docker compose -f infra/compose/services.yml up -d
+          rule_engine supervised_model anomaly_model risk_fusion
+          decision_engine investigation_agent
+      - name: Run end-to-end HTTP smoke test
+        run: python3 scripts/compose-smoke.py
+
   # ---------------------------------------------------------------- test -----
   test-python:
     name: Test (pytest)
@@ -259,8 +306,25 @@ jobs:
           for s in services/*; do
             [ -f "$s/pyproject.toml" ] && pip install -e "$s" || true
           done
-      - name: pytest
-        run: pytest -q
+      - name: pytest (services + libs; ML covered by test-ml)
+        run: pytest -q --ignore=ml
+
+  test-ml:
+    name: Test (ML pipelines)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install ML training deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+          pip install -e "ml[training]"
+      - name: pytest (ml)
+        run: pytest -q ml/tests
 
   test-web:
     name: Test (vitest)
@@ -278,3 +342,23 @@ jobs:
       - name: vitest
         run: npm test -- --run
         working-directory: web
+
+  # ----------------------------------------------------------- security -----
+  secret-scan:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  dependency-review:
+    name: Dependency review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/dependency-review-action@v4

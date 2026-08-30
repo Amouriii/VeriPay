@@ -19,5 +19,15 @@ class Settings:
         "POSTGRES_DSN", "postgresql://veripay:veripay@localhost:5432/veripay"
     )
 
+    # LLM investigation boundary (PLAN §20). "deterministic" is the
+    # zero-dependency default; "openai_compatible" targets a local vLLM
+    # (OpenAI-compatible) server and degrades to the deterministic provider
+    # whenever the server is unreachable or the ``openai`` package is absent.
+    LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "deterministic")
+    LLM_BASE_URL: str = os.getenv("LLM_BASE_URL", "http://localhost:8000/v1")
+    LLM_API_KEY: str = os.getenv("LLM_API_KEY", "EMPTY")  # vLLM ignores; never commit a real key
+    LLM_MODEL: str = os.getenv("LLM_MODEL", "veripay-explainer")
+    LLM_TIMEOUT_SECONDS: float = float(os.getenv("LLM_TIMEOUT_SECONDS", "30"))
+
 
 settings = Settings()

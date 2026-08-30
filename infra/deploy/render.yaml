@@ -1,0 +1,80 @@
+# Render Blueprint (https://render.com/docs/blueprint-spec).
+#
+# One free web service per core demo stage. Build context is the repository
+# root (see infra/deploy/veripay.Dockerfile). Each service binds the
+# Render-injected PORT. Trained model artifacts are gitignored, so ML serving
+# services run their deterministic fallback unless the build trains models
+# (see docs/deployment.md).
+#
+# Deploy: push this repo to GitHub, then in Render: New -> Blueprint -> select
+# the repo. Or: `npx -y @renderinc/cli blueprint launch` with your API key.
+
+services:
+  - type: web
+    name: veripay-ingress
+    runtime: docker
+    plan: free
+    dockerfilePath: infra/deploy/veripay.Dockerfile
+    buildArgs:
+      SERVICE: ingress
+    healthCheckPath: /health
+    envVars:
+      - key: LOG_LEVEL
+        value: INFO
+
+  - type: web
+    name: veripay-rule-engine
+    runtime: docker
+    plan: free
+    dockerfilePath: infra/deploy/veripay.Dockerfile
+    buildArgs:
+      SERVICE: rule_engine
+    healthCheckPath: /health
+
+  - type: web
+    name: veripay-risk-fusion
+    runtime: docker
+    plan: free
+    dockerfilePath: infra/deploy/veripay.Dockerfile
+    buildArgs:
+      SERVICE: risk_fusion
+    healthCheckPath: /health
+
+  - type: web
+    name: veripay-decision-engine
+    runtime: docker
+    plan: free
+    dockerfilePath: infra/deploy/veripay.Dockerfile
+    buildArgs:
+      SERVICE: decision_engine
+    healthCheckPath: /health
+
+  - type: web
+    name: veripay-investigation-agent
+    runtime: docker
+    plan: free
+    dockerfilePath: infra/deploy/veripay.Dockerfile
+    buildArgs:
+      SERVICE: investigation_agent
+    healthCheckPath: /health
+    envVars:
+      - key: LLM_PROVIDER
+        value: deterministic
+
+  - type: web
+    name: veripay-feedback-loop
+    runtime: docker
+    plan: free
+    dockerfilePath: infra/deploy/veripay.Dockerfile
+    buildArgs:
+      SERVICE: feedback_loop
+    healthCheckPath: /health
+
+  - type: web
+    name: veripay-dashboard
+    runtime: node
+    plan: free
+    rootDir: web
+    buildCommand: npm ci && npm run build
+    startCommand: npm run preview -- --host 0.0.0.0 --port $PORT
+    healthCheckPath: /index.html
