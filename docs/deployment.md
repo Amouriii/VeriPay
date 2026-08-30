@@ -106,18 +106,18 @@ curl -X PATCH -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/js
   https://api.vercel.com/v9/projects/veri-pay
 ```
 
-The committed `vercel.json` (repo root) explicitly installs and builds the
-`web/` package, publishes `web/dist`, and rewrites client-side routes (including
-`/executive-demo`) to the Vite entrypoint. It is schema-valid; keep it minimal
-and valid:
+The committed `vercel.json` is written for the Vercel project configured with
+`rootDirectory = web`: Vercel runs the commands from inside `web/`, publishes
+`dist`, and rewrites client-side routes (including `/executive-demo`) to the Vite
+entrypoint. It is schema-valid; keep it minimal and valid:
 
 ```json
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vite",
-  "installCommand": "cd web && npm install",
-  "buildCommand": "cd web && npm run build",
-  "outputDirectory": "web/dist",
+  "installCommand": "npm install",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "rewrites": [{"source": "/(.*)", "destination": "/index.html"}]
 }
 ```
