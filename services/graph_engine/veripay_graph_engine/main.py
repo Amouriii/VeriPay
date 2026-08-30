@@ -97,16 +97,12 @@ def create_app() -> FastAPI:
     @app.post("/api/v1/graph/observe", response_model=GraphObserveResponse)
     def observe(request: GraphObserveRequest) -> GraphObserveResponse:
         _observe(request)
-        return GraphObserveResponse(
-            status="recorded", transaction_id=request.transaction_id
-        )
+        return GraphObserveResponse(status="recorded", transaction_id=request.transaction_id)
 
     @app.post("/api/v1/graph/score", response_model=GraphScoreResponse)
     def score(request: GraphScoreRequest) -> GraphScoreResponse:
         _observe(request)
-        ctx = network_context(
-            get_store(), request.cc_num, window_days=settings.NETWORK_WINDOW_DAYS
-        )
+        ctx = network_context(get_store(), request.cc_num, window_days=settings.NETWORK_WINDOW_DAYS)
         return GraphScoreResponse(
             transaction_id=request.transaction_id,
             cc_num=request.cc_num,
@@ -121,9 +117,7 @@ def create_app() -> FastAPI:
     def ego(cc_num: int) -> dict[str, Any]:
         if cc_num <= 0:
             raise HTTPException(status_code=422, detail="cc_num must be positive")
-        return network_context(
-            get_store(), cc_num, window_days=settings.NETWORK_WINDOW_DAYS
-        )
+        return network_context(get_store(), cc_num, window_days=settings.NETWORK_WINDOW_DAYS)
 
     @app.get("/api/v1/graph/community/{cc_num}")
     def community(cc_num: int) -> dict[str, Any]:

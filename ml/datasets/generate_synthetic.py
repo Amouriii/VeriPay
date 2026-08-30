@@ -149,9 +149,7 @@ def generate(n_rows: int = DEFAULT_N_ROWS, seed: int = DEFAULT_SEED) -> pd.DataF
     # Inject a fraud ring: ring_n accounts that all transact at one shared
     # merchant (FRAUD_RING_MERCHANT) within a tight window and are all labelled
     # fraud. This gives the graph axis a clear, detectable cluster.
-    ring_customers = np.array(
-        [4_000_000_000_000_000 + i for i in range(ring_n)]
-    )
+    ring_customers = np.array([4_000_000_000_000_000 + i for i in range(ring_n)])
     ring_ts = pd.to_datetime(
         base_unix - rng.integers(0, 3600, size=ring_n), unit="s", utc=True
     ).astype(str)

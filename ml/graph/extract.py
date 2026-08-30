@@ -102,9 +102,7 @@ class GraphStore:
         self._txns[tx.transaction_id] = tx
         self._customer_merchants.setdefault(tx.cc_num, set()).add(tx.merchant)
         self._merchant_customers.setdefault(tx.merchant, set()).add(tx.cc_num)
-        self._merchant_events[tx.merchant].append(
-            (tx.timestamp, tx.cc_num, tx.transaction_id)
-        )
+        self._merchant_events[tx.merchant].append((tx.timestamp, tx.cc_num, tx.transaction_id))
         if tx.flagged:
             self._flagged_count[tx.cc_num] += 1
 
@@ -145,9 +143,7 @@ class GraphStore:
 
         co_occurrence = self._co_occurrence(cc_num, merchants, window_days)
 
-        cluster_size, cluster_flagged_ratio = self._component_stats(
-            cc_num, window_days
-        )
+        cluster_size, cluster_flagged_ratio = self._component_stats(cc_num, window_days)
 
         return NodeFeatures(
             merchant_degree=merchant_degree,
@@ -233,24 +229,18 @@ class GraphStore:
             status = "review" if any(self.is_flagged(p) for p in crowd) else "normal"
             nodes.append({"id": f"m:{m}", "kind": "merchant", "label": m, "status": status})
             vol = self._edge_volume(cc_num, m, window_days)
-            edges.append(
-                {"from": f"c:{cc_num}", "to": f"m:{m}", "weight": round(vol, 2)}
-            )
+            edges.append({"from": f"c:{cc_num}", "to": f"m:{m}", "weight": round(vol, 2)})
             peer_set |= crowd
 
         # Cap peer nodes rendered to keep the ego graph legible.
         for p in sorted(peer_set)[: max(0, limit - len(merchants) - 1)]:
             status = "flagged" if self.is_flagged(p) else "normal"
-            nodes.append(
-                {"id": f"c:{p}", "kind": "customer", "label": str(p), "status": status}
-            )
+            nodes.append({"id": f"c:{p}", "kind": "customer", "label": str(p), "status": status})
             # connect peer to first shared merchant
             shared_merchants = self._scoped_merchants(cc_num, window_days)
             shared = sorted(shared_merchants & self._scoped_merchants(p, window_days))
             if shared:
-                edges.append(
-                    {"from": f"c:{p}", "to": f"m:{shared[0]}", "weight": 1.0}
-                )
+                edges.append({"from": f"c:{p}", "to": f"m:{shared[0]}", "weight": 1.0})
         return {"nodes": nodes, "edges": edges}
 
     # ------------------------------------------------------------------ community
@@ -279,9 +269,7 @@ class GraphStore:
         merchant_members: dict[str, set[int]] = defaultdict(set)
         for c in members:
             status = "self" if c == cc_num else ("flagged" if self.is_flagged(c) else "normal")
-            nodes.append(
-                {"id": f"c:{c}", "kind": "customer", "label": str(c), "status": status}
-            )
+            nodes.append({"id": f"c:{c}", "kind": "customer", "label": str(c), "status": status})
         # Merchant nodes that connect >=2 members (the ring's shared merchants).
         merchants_seen: set[str] = set()
         for c in members:
@@ -293,14 +281,10 @@ class GraphStore:
             if len(crowd) < 1:
                 continue
             status = "review" if any(self.is_flagged(p) for p in crowd) else "normal"
-            nodes.append(
-                {"id": f"m:{m}", "kind": "merchant", "label": m, "status": status}
-            )
+            nodes.append({"id": f"m:{m}", "kind": "merchant", "label": m, "status": status})
             for c in crowd:
                 vol = self._edge_volume(c, m, window_days)
-                edges.append(
-                    {"from": f"c:{c}", "to": f"m:{m}", "weight": round(vol, 2)}
-                )
+                edges.append({"from": f"c:{c}", "to": f"m:{m}", "weight": round(vol, 2)})
         return {"nodes": nodes, "edges": edges}
 
     def community(
@@ -323,9 +307,7 @@ class GraphStore:
                 shared_merchants.add(m)
                 total_volume += self._edge_volume(c, m, window_days)
         return {
-            "graph": self.community_graph(
-                cc_num, window_days=window_days, node_limit=node_limit
-            ),
+            "graph": self.community_graph(cc_num, window_days=window_days, node_limit=node_limit),
             "stats": {
                 "cluster_size": len(members),
                 "flagged_count": len(flagged_members),
@@ -377,9 +359,7 @@ class GraphStore:
         if cutoff is None:
             return self.merchants_for(cc_num)
         return {
-            t.merchant
-            for t in self._txns.values()
-            if t.cc_num == cc_num and t.timestamp >= cutoff
+            t.merchant for t in self._txns.values() if t.cc_num == cc_num and t.timestamp >= cutoff
         }
 
     def _scoped_customers(self, merchant: str, window_days: int | None) -> set[int]:
@@ -402,9 +382,7 @@ class GraphStore:
             and (cutoff is None or t.timestamp >= cutoff)
         )
 
-    def _co_occurrence(
-        self, cc_num: int, merchants: set[str], window_days: int | None
-    ) -> int:
+    def _co_occurrence(self, cc_num: int, merchants: set[str], window_days: int | None) -> int:
         cutoff = self._cutoff(window_days)
         count = 0
         for m in merchants:
@@ -425,9 +403,7 @@ class GraphStore:
                         break
         return count
 
-    def _component_stats(
-        self, cc_num: int, window_days: int | None
-    ) -> tuple[int, float]:
+    def _component_stats(self, cc_num: int, window_days: int | None) -> tuple[int, float]:
         """Connected-component size + flagged ratio over the shared-merchant graph."""
         component = self._community_members(cc_num, window_days)
         if not component:

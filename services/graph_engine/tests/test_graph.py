@@ -51,9 +51,7 @@ def test_isolated_customer_has_zero_network_risk() -> None:
 def test_shared_merchant_raises_risk_with_flagged_peer() -> None:
     store = GraphStore()
     store.observe(_tx(tid="t1", cc=1, merchant="m_shared", amount=200.0))
-    store.observe(
-        _tx(tid="t2", cc=2, merchant="m_shared", amount=300.0, minutes=5, flagged=True)
-    )
+    store.observe(_tx(tid="t2", cc=2, merchant="m_shared", amount=300.0, minutes=5, flagged=True))
     score = store.network_risk_score(1)
     assert score > 0.0
     findings = store.findings(1)
@@ -113,9 +111,7 @@ def test_community_finds_full_ring_via_shared_merchant() -> None:
     store = GraphStore()
     # Ring of 4 flagged customers at m_ring
     for i in range(4):
-        store.observe(
-            _tx(tid=f"ring_{i}", cc=100 + i, merchant="m_ring", minutes=i, flagged=True)
-        )
+        store.observe(_tx(tid=f"ring_{i}", cc=100 + i, merchant="m_ring", minutes=i, flagged=True))
     # Innocent customer shares m_bridge with one ring member
     store.observe(_tx(tid="bridge", cc=5, merchant="m_bridge", minutes=10))
     store.observe(_tx(tid="ring_bridge", cc=100, merchant="m_bridge", minutes=11, flagged=True))
