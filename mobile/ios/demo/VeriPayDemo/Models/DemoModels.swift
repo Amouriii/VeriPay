@@ -1,11 +1,40 @@
 import Foundation
 
+enum DemoAccountType: String, CaseIterable, Identifiable {
+  case personal
+  case business
+
+  var id: String { rawValue }
+  var title: String { rawValue.capitalized }
+  var subtitle: String {
+    switch self {
+    case .personal: return "Personal banking"
+    case .business: return "Business banking"
+    }
+  }
+  var symbol: String {
+    self == .personal ? "person.crop.circle.fill" : "building.2.crop.circle.fill"
+  }
+}
+
+enum DemoBiometricMethod: String {
+  case faceID = "Face ID"
+  case touchID = "Touch ID"
+
+  var symbol: String { self == .faceID ? "faceid" : "touchid" }
+}
+
 struct DemoAccount {
   let customerName: String
   let firstName: String
   let balance: Decimal
   let availableCredit: Decimal
   let cardLastFour: String
+  let type: DemoAccountType
+  let biometricMethod: DemoBiometricMethod
+  let businessName: String?
+
+  var displayName: String { businessName ?? customerName }
 }
 
 struct DemoTransaction: Identifiable, Equatable {
@@ -26,14 +55,8 @@ struct DemoTransaction: Identifiable, Equatable {
   var status: Status
 
   init(
-    id: UUID = UUID(),
-    merchant: String,
-    category: String,
-    amount: Decimal,
-    location: String,
-    date: Date,
-    symbol: String,
-    status: Status
+    id: UUID = UUID(), merchant: String, category: String, amount: Decimal,
+    location: String, date: Date, symbol: String, status: Status
   ) {
     self.id = id
     self.merchant = merchant
@@ -45,28 +68,15 @@ struct DemoTransaction: Identifiable, Equatable {
     self.status = status
   }
 
-  var amountText: String {
-    amount.formattedCurrency
-  }
-
-  var shortDateText: String {
-    Self.shortDateFormatter.string(from: date)
-  }
-
-  var fullDateText: String {
-    Self.fullDateFormatter.string(from: date)
-  }
+  var amountText: String { amount.formattedCurrency }
+  var shortDateText: String { Self.shortDateFormatter.string(from: date) }
+  var fullDateText: String { Self.fullDateFormatter.string(from: date) }
 
   private static let shortDateFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "MMM d"
-    return formatter
+    let formatter = DateFormatter(); formatter.dateFormat = "MMM d"; return formatter
   }()
-
   private static let fullDateFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "MMM d, yyyy 'at' h:mm a"
-    return formatter
+    let formatter = DateFormatter(); formatter.dateFormat = "MMM d, yyyy 'at' h:mm a"; return formatter
   }()
 }
 
@@ -84,33 +94,20 @@ struct FraudAnalysis: Equatable {
   let summary: String
   let reasons: [RiskReason]
 
-  enum RiskLevel: Equatable {
-    case low
-    case high
-  }
+  enum RiskLevel: Equatable { case low, high }
 }
 
-enum DemoScenario: Equatable {
-  case lowRisk
-  case highRisk
-}
+enum DemoScenario: Equatable { case lowRisk, highRisk }
 
 enum DemoRoute {
-  case welcome
-  case dashboard
-  case analyzing
-  case analysisResult
-  case verification
-  case approved
-  case blocked
+  case welcome, accountSelection, biometric, dashboard, analyzing, analysisResult, verification,
+       approved, blocked
 }
 
 extension Decimal {
   var formattedCurrency: String {
-    let formatter = NumberFormatter()
-    formatter.numberStyle = .currency
-    formatter.currencyCode = "USD"
-    formatter.locale = Locale(identifier: "en_US")
+    let formatter = NumberFormatter(); formatter.numberStyle = .currency
+    formatter.currencyCode = "USD"; formatter.locale = Locale(identifier: "en_US")
     return formatter.string(from: NSDecimalNumber(decimal: self)) ?? "$0.00"
   }
 }

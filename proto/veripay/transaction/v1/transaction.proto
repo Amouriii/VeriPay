@@ -17,6 +17,24 @@ enum Channel {
   CHANNEL_CARD_NOT_PRESENT = 2;        // e-commerce gateway
 }
 
+enum PaymentRail {
+  PAYMENT_RAIL_UNSPECIFIED = 0;
+  PAYMENT_RAIL_CARD = 1;
+  PAYMENT_RAIL_ISO_8583 = 2;
+  PAYMENT_RAIL_FEDNOW = 3;
+  PAYMENT_RAIL_RTP = 4;
+  PAYMENT_RAIL_ACH = 5;
+  PAYMENT_RAIL_SWIFT = 6;
+  PAYMENT_RAIL_ISO_20022 = 7;
+  PAYMENT_RAIL_DOMESTIC_INSTANT = 8;
+}
+
+enum ProcessingPath {
+  PROCESSING_PATH_UNSPECIFIED = 0;
+  PROCESSING_PATH_FAST = 1;       // card authorization, <500ms target
+  PROCESSING_PATH_SECONDARY = 2;  // wire/instant transfer, <5000ms target
+}
+
 message TransactionEvent {
   string transaction_id = 1;
   string user_id = 2;
@@ -35,6 +53,8 @@ message TransactionEvent {
   optional double device_lat = 15;
   optional double device_lon = 16;
   optional string ip = 17;
+  PaymentRail payment_rail = 18;
+  ProcessingPath processing_path = 19;
 }
 
 message AuthorizationRequest {
@@ -45,7 +65,12 @@ message AuthorizationRequest {
 message AuthorizationResponse {
   string transaction_id = 1;
   string decision = 2;             // DecisionAction as string
-  int32 risk_score = 3;            // 0-100
+  int32 risk_score = 3;            // 0-100 percentage score
   string reason_code = 4;
   optional string challenge_id = 5;
+  string risk_tier = 6;
+  string friction = 7;
+  int32 verification_timeout_seconds = 8;
+  string processing_path = 9;
+  string explanation_mode = 10;
 }
