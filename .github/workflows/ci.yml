@@ -309,7 +309,9 @@ jobs:
             [ -f "$s/pyproject.toml" ] && pip install -e "$s" || true
           done
       - name: pytest (services + libs; ML covered by test-ml)
-        run: pytest -q --ignore=ml
+        # --ignore=ml/tests (not --ignore=ml): pytest 9.x fails to exclude
+        # a bare top-level directory, but honors the nested tests path.
+        run: pytest -q --ignore=ml/tests
 
   test-ml:
     name: Test (ML pipelines)
