@@ -1,6 +1,7 @@
 // MSW (Mock Service Worker) handlers for the local demo.
 // Paths and payloads mirror the web client contract (web/src/api, web/src/types).
 import { http, HttpResponse } from "msw";
+import { analystHandlers } from "./analystHandlers";
 
 const transactions = [
   {
@@ -27,6 +28,8 @@ const transactions = [
 ];
 
 export const handlers = [
+  ...analystHandlers,
+
   http.get("/api/transactions", () => HttpResponse.json(transactions)),
 
   http.get("/api/transactions/:txId/risk", ({ params }) =>

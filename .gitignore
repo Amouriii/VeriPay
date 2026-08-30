@@ -18,3 +18,4 @@ web/tsconfig.tsbuildinfo
 .DS_Store
 proto/gen/
 .freebuff/
+ml/models/

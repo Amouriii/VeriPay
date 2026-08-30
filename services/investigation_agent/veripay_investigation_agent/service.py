@@ -15,6 +15,9 @@ class LlmExplanation(BaseModel):
     model_name: str
     prompt_version: str
     generated_at: datetime
+    # True when the configured provider failed and the deterministic
+    # explainer produced the summary instead.
+    fallback: bool = False
 
 
 class InvestigationRequest(BaseModel):
@@ -60,6 +63,14 @@ def _reason_codes(score: int, baseline_count: int, macro_context: dict[str, obje
     return reasons or ["NO_ADVERSE_FACTOR"]
 
 
+def _provider_from_settings() -> LocalLlmProvider:
+    """Resolve the configured provider (deterministic by default)."""
+    from veripay_investigation_agent.config import settings
+    from veripay_investigation_agent.providers import provider_from_settings
+
+    return provider_from_settings(settings)
+
+
 def evaluate(
     request: InvestigationRequest,
     *,
@@ -69,7 +80,7 @@ def evaluate(
 ) -> LlmExplanation:
     """Explain a model result without allowing the LLM to authorize a payment."""
     redactor = redactor or DeterministicPiiRedactor()
-    provider = provider or DeterministicLocalLlmProvider()
+    provider = provider or _provider_from_settings()
     current = now or datetime.now(UTC)
     if current.tzinfo is None:
         current = current.replace(tzinfo=UTC)
@@ -86,14 +97,27 @@ def evaluate(
         "risk_score": request.risk_score,
         "macro_context": request.macro_context,
     }
+    # The provider is advisory-only and interchangeable. If the configured
+    # provider fails (server unreachable, bad output, missing dependency),
+    # degrade to the deterministic explainer instead of erroring.
+    try:
+        summary = provider.explain(context)
+        model_name = provider.model_name
+        fallback = False
+    except Exception:
+        deterministic = DeterministicLocalLlmProvider()
+        summary = deterministic.explain(context)
+        model_name = deterministic.model_name
+        fallback = True
     return LlmExplanation(
-        summary=provider.explain(context),
+        summary=summary,
         regulatory_reason_codes=_reason_codes(
             request.risk_score, len(history), request.macro_context
         ),
-        model_name=provider.model_name,
+        model_name=model_name,
         prompt_version=request.prompt_version,
         generated_at=current,
+        fallback=fallback,
     )
 
 
@@ -110,4 +134,5 @@ __all__ = [
     "LlmExplanation",
     "LocalLlmProvider",
     "evaluate",
+    "_provider_from_settings",
 ]

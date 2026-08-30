@@ -9,6 +9,7 @@ const navigation = [
   ['Customers', '/bank/customers', '♙'],
   ['Fraud & Alerts', '/bank/alerts', '!'],
   ['Risk Analytics', '/bank/analytics', '◒'],
+  ['Analyst Console', '/analyst', '⚑'],
 ];
 
 export function BankLayout({ children }: { children: ReactNode }) {

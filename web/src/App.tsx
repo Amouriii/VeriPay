@@ -12,6 +12,26 @@ import { BankLogin } from './pages/BankLogin';
 //import { BankOverview } from './pages/BankOverview';
 import { BankCustomerProfile } from './pages/BankCustomerProfile';
 import { BankCustomers } from './pages/BankCustomers';
+import { AnalystLayout } from './components/AnalystLayout';
+import { AlertQueue } from './pages/analyst/AlertQueue';
+import { TxDetail } from './pages/analyst/TxDetail';
+import { CustomerProfile } from './pages/analyst/CustomerProfile';
+import { SystemPerformance } from './pages/analyst/SystemPerformance';
+import { ModelInfo } from './pages/analyst/ModelInfo';
+
+function AnalystApp() {
+  return (
+    <AnalystLayout>
+      <Routes>
+        <Route index element={<AlertQueue />} />
+        <Route path="tx/:id" element={<TxDetail />} />
+        <Route path="customer/:ccNum" element={<CustomerProfile />} />
+        <Route path="performance" element={<SystemPerformance />} />
+        <Route path="models" element={<ModelInfo />} />
+      </Routes>
+    </AnalystLayout>
+  );
+}
 
 function CustomerApp() {
   return (
@@ -38,6 +58,7 @@ export function App() {
   return (
     <Routes>
       <Route path="/customer/*" element={<CustomerApp />} />
+      <Route path="/analyst/*" element={<AnalystApp />} />
       <Route path="/login" element={<BankLogin />} />
       <Route path="*" element={<BankLayout><Routes>
         <Route path="/" element={<BankLogin />} />
