@@ -11,6 +11,10 @@ struct ContentView: View {
         switch store.route {
         case .welcome:
           WelcomeView()
+        case .accountSelection:
+          AccountSelectionView()
+        case .biometric:
+          BiometricView()
         case .dashboard:
           DashboardView()
         case .analyzing:
@@ -39,6 +43,8 @@ struct ContentView: View {
   private var routeIdentifier: String {
     switch store.route {
     case .welcome: return "welcome"
+    case .accountSelection: return "accountSelection"
+    case .biometric: return "biometric"
     case .dashboard: return "dashboard"
     case .analyzing: return "analyzing"
     case .analysisResult: return "analysisResult"

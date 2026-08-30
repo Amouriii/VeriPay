@@ -50,6 +50,82 @@ class DecisionAction(StrEnum):
     REVERSE = "REVERSE"
 
 
+class RiskTier(StrEnum):
+    NO_RISK = "NO_RISK"
+    LOW = "LOW"
+    MODERATE = "MODERATE"
+    HIGH = "HIGH"
+
+
+class FrictionType(StrEnum):
+    NONE = "NONE"
+    PUSH = "PUSH"
+    BIOMETRIC = "BIOMETRIC"
+    MULTI_FACTOR = "MULTI_FACTOR"
+
+
+class VerificationWorkflow(StrEnum):
+    SILENT_PASS = "SILENT_PASS"
+    PUSH_APPROVE_DENY = "PUSH_APPROVE_DENY"
+    PUSH_BIOMETRIC = "PUSH_BIOMETRIC"
+    EXACT_AMOUNT_BIOMETRIC_SWIPE = "EXACT_AMOUNT_BIOMETRIC_SWIPE"
+
+
+class TimeoutFallback(StrEnum):
+    STANDARD_AUDIT = "STANDARD_AUDIT"
+    AUTO_DECLINE = "AUTO_DECLINE"
+    AUTO_DECLINE_AND_LOCK = "AUTO_DECLINE_AND_LOCK"
+    LIVE_ANALYST_ESCALATION = "LIVE_ANALYST_ESCALATION"
+
+
+class PaymentRail(StrEnum):
+    CARD = "CARD"
+    ISO_8583 = "ISO_8583"
+    FEDNOW = "FEDNOW"
+    RTP = "RTP"
+    ACH = "ACH"
+    SWIFT = "SWIFT"
+    ISO_20022 = "ISO_20022"
+    DOMESTIC_INSTANT = "DOMESTIC_INSTANT"
+
+
+class ProcessingPath(StrEnum):
+    FAST = "FAST"
+    SECONDARY = "SECONDARY"
+
+
+class ExplanationMode(StrEnum):
+    ASYNC = "ASYNC"
+    IN_BAND = "IN_BAND"
+
+
+class VerificationOutcome(StrEnum):
+    PENDING = "PENDING"
+    APPROVED = "APPROVED"
+    DENIED = "DENIED"
+    TIMED_OUT = "TIMED_OUT"
+    EXPIRED = "EXPIRED"
+    LOCKED = "LOCKED"
+    ESCALATED = "ESCALATED"
+
+
+class IntegrityStatus(StrEnum):
+    PASS = "PASS"
+    FAIL = "FAIL"
+    UNAVAILABLE = "UNAVAILABLE"
+
+
+class EscalationStatus(StrEnum):
+    OPEN = "OPEN"
+    ASSIGNED = "ASSIGNED"
+    RESOLVED = "RESOLVED"
+
+
+class RegulatoryFramework(StrEnum):
+    FCRA = "FCRA"
+    GDPR = "GDPR"
+
+
 class RiskBand(StrEnum):
     APPROVE = "APPROVE"
     VERIFY = "VERIFY"

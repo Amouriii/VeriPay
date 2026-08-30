@@ -23,6 +23,15 @@ CREATE TABLE IF NOT EXISTS risk_statistics (
     blocked_count BIGINT NOT NULL DEFAULT 0
 );
 
+CREATE TABLE IF NOT EXISTS transaction_statistics (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    statistic_date DATE NOT NULL,
+    transaction_type VARCHAR(50),
+    transaction_count BIGINT NOT NULL DEFAULT 0,
+    total_amount NUMERIC(18, 2) NOT NULL DEFAULT 0,
+    average_amount NUMERIC(18, 2)
+);
+
 CREATE TABLE IF NOT EXISTS fraud_policies (
     policy_id TEXT PRIMARY KEY,
     bank_id TEXT NOT NULL,

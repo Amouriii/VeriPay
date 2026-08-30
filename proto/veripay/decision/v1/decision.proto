@@ -13,6 +13,31 @@ enum DecisionAction {
   DECISION_ACTION_REVERSE = 6;
 }
 
+enum FrictionType {
+  FRICTION_TYPE_UNSPECIFIED = 0;
+  FRICTION_TYPE_NONE = 1;
+  FRICTION_TYPE_PUSH = 2;
+  FRICTION_TYPE_BIOMETRIC = 3;
+  FRICTION_TYPE_MULTI_FACTOR = 4;
+}
+
+enum VerificationOutcome {
+  VERIFICATION_OUTCOME_UNSPECIFIED = 0;
+  VERIFICATION_OUTCOME_PENDING = 1;
+  VERIFICATION_OUTCOME_APPROVED = 2;
+  VERIFICATION_OUTCOME_DENIED = 3;
+  VERIFICATION_OUTCOME_TIMED_OUT = 4;
+  VERIFICATION_OUTCOME_EXPIRED = 5;
+  VERIFICATION_OUTCOME_LOCKED = 6;
+  VERIFICATION_OUTCOME_ESCALATED = 7;
+}
+
+enum ExplanationMode {
+  EXPLANATION_MODE_UNSPECIFIED = 0;
+  EXPLANATION_MODE_ASYNC = 1;
+  EXPLANATION_MODE_IN_BAND = 2;
+}
+
 message DecideRequest {
   string transaction_id = 1;
   int32 risk_score = 2;
@@ -21,6 +46,11 @@ message DecideRequest {
   double investigation_cost = 5;
   double auth_friction = 6;       // customer friction estimate
   double churn_risk = 7;          // customer churn risk estimate
+  string risk_tier = 8;
+  string payment_rail = 9;
+  string processing_path = 10;
+  string verification_outcome = 11;
+  bool evidence_available = 12;
 }
 
 message DecideResponse {
@@ -28,6 +58,13 @@ message DecideResponse {
   DecisionAction action = 2;
   string rationale = 3;
   optional string challenge_id = 4;
+  string risk_tier = 5;
+  string friction = 6;
+  int32 timeout_seconds = 7;
+  string timeout_fallback = 8;
+  string processing_path = 9;
+  string explanation_mode = 10;
+  bool escalation_required = 11;
 }
 
 service DecisionEngineService {

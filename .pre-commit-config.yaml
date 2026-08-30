@@ -15,3 +15,18 @@ repos:
     rev: v3.3.0
     hooks:
       - id: conventional-pre-commit
+  - repo: local
+    hooks:
+      - id: tsc
+        name: TypeScript check (web)
+        entry: bash -c 'cd web && ./node_modules/.bin/tsc --noEmit'
+        language: system
+        files: ^web/
+        types: [text]
+      - id: eslint
+        name: ESLint (web)
+        entry: bash -c 'cd web && ./node_modules/.bin/eslint .'
+        language: system
+        files: ^web/.*\.(ts|tsx)$
+        types: [text]
+        pass_filenames: false
