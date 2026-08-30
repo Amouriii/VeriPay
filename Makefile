@@ -1,4 +1,4 @@
-.PHONY: help install proto test lint format docker-build up down seed-analyst clean
+.PHONY: help install proto test lint format docker-build up down seed-analyst executive-demo clean
 
 help:
 	@echo "VeriPay monorepo"
@@ -9,6 +9,7 @@ help:
 	@echo "  make up         - docker-compose up (local stack)"
 	@echo "  make down       - docker-compose down"
 	@echo "  make seed-analyst - re-seed the analyst console alert queue"
+	@echo "  make executive-demo - run the offline executive board demo"
 
 install:
 	pip install -e ".[dev]" -e libs/veripay_common
@@ -42,6 +43,9 @@ down:
 
 seed-analyst:
 	docker compose run --rm seed_analyst
+
+executive-demo:
+	python scripts/executive-demo.py --offline
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true

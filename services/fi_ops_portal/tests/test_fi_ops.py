@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 
 from fastapi.testclient import TestClient
 from veripay_common.enums import DecisionAction, DisputeReason, DisputeStatus, RiskBand
+from veripay_fi_ops_portal.auth import ConfigTokenAuthenticator
 from veripay_fi_ops_portal.main import create_app
 from veripay_fi_ops_portal.service import (
     InMemoryFiOpsRepository,
@@ -9,6 +10,10 @@ from veripay_fi_ops_portal.service import (
     OpsRiskComponent,
     OpsTransactionView,
 )
+
+
+def _authenticator() -> ConfigTokenAuthenticator:
+    return ConfigTokenAuthenticator({"t": frozenset({"FI_OPS", "ADMIN"})})
 
 
 def test_fi_ops_views_and_report() -> None:
@@ -37,9 +42,10 @@ def test_fi_ops_views_and_report() -> None:
             updated_at=datetime(2026, 1, 1, tzinfo=UTC),
         )
     )
-    client = TestClient(create_app(repository))
-    transaction = client.get("/api/v1/fi-ops/transactions/tx-1")
-    report = client.get("/api/v1/fi-ops/reports/regulatory")
+    client = TestClient(create_app(repository, authenticator=_authenticator()))
+    auth = {"Authorization": "Bearer t"}
+    transaction = client.get("/api/v1/fi-ops/transactions/tx-1", headers=auth)
+    report = client.get("/api/v1/fi-ops/reports/regulatory", headers=auth)
     policy = client.get("/api/v1/fi-ops/access-policy")
     assert transaction.status_code == 200
     assert transaction.json()["reason_codes"] == ["DCVV_MISMATCH"]
@@ -49,5 +55,8 @@ def test_fi_ops_views_and_report() -> None:
 
 
 def test_missing_fi_ops_transaction_is_not_found() -> None:
-    response = TestClient(create_app()).get("/api/v1/fi-ops/transactions/missing")
+    client = TestClient(create_app(authenticator=_authenticator()))
+    response = client.get(
+        "/api/v1/fi-ops/transactions/missing", headers={"Authorization": "Bearer t"}
+    )
     assert response.status_code == 404

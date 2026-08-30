@@ -47,6 +47,7 @@ import { TxDetail } from './pages/analyst/TxDetail';
 import { CustomerProfile } from './pages/analyst/CustomerProfile';
 import { SystemPerformance } from './pages/analyst/SystemPerformance';
 import { ModelInfo } from './pages/analyst/ModelInfo';
+import { ExecutiveDemo } from './pages/ExecutiveDemo';
 
 /* -------------------------------------------------------------------------- */
 /* Customer routes                                                            */
@@ -128,6 +129,8 @@ function AnalystApp() {
 export function App() {
   return (
     <Routes>
+      <Route path="/executive-demo" element={<ExecutiveDemo />} />
+
       <Route
         path="/customer/login"
         element={<CustomerLogin />}

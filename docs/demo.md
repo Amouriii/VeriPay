@@ -1,5 +1,76 @@
 # Live Demo / Deployment
 
+## Executive board briefing (10–15 minutes)
+
+Use the dedicated web briefing for a concise narrative, then jump into product
+surfaces for evidence. The briefing covers all three board perspectives:
+customer trust and fraud prevention, enterprise operations, and the governed
+technology platform.
+
+### Fastest path: deterministic, no Docker required
+
+```bash
+python scripts/executive-demo.py --offline
+# or machine-readable evidence for a recording/checklist:
+python scripts/executive-demo.py --offline --json > /tmp/veripay-board-demo.json
+cd web && npm run dev
+```
+
+Open `http://localhost:5173/executive-demo`. The page is deliberately
+self-contained and uses the existing deterministic MSW fixtures. Present the
+three chapters in order:
+
+1. **Trust & fraud prevention** — open `tx_9001`, show the BLOCK decision,
+   feature/timeline/network evidence, governed explanation, and analyst feedback.
+2. **Enterprise operating model** — open FI Ops, treasury, and risk analytics to
+   show disputes, controls, portfolio oversight, and auditability.
+3. **Technology platform** — open model info and system performance to show
+   multi-axis scoring, safe degradation, drift detection, feedback, and
+   champion-gated retraining.
+
+The left-side links are presentation shortcuts; the board page remains usable
+as a standalone narrative if backend services are unavailable.
+
+### Live path: local services and seeded queue
+
+```bash
+make up
+make seed-analyst
+python scripts/executive-demo.py --live
+# optional JSON capture
+python scripts/executive-demo.py --live --json > /tmp/veripay-board-live.json
+```
+
+The live runner targets `VERIPAY_ANALYST_API_URL` (default
+`http://localhost:8026`) and intentionally reports missing stages rather than
+failing the presentation. For the full service-chain walkthrough, continue
+with the existing steps below. If a model artifact or optional service is not
+ready, use the deterministic web briefing as the fallback.
+
+### Coverage map
+
+| Board claim | Product / contract evidence |
+|---|---|
+| Stop fraud before settlement | Ingress, rules, supervised + anomaly models, risk fusion, decision engine |
+| Explain decisions to humans | Analyst case report, feature attribution, timeline, investigation agent |
+| Understand coordinated fraud | Graph engine, network tab, customer community view |
+| Protect customers after a flag | Auth orchestration, push/biometric verification, customer portal |
+| Operate at institutional scale | FI Ops transactions, disputes, regulatory reports, audit views |
+| Give businesses control | Treasury policy, spend limits, VCN controls, webhooks, disputes |
+| Improve from outcomes | Feedback loop, analyst feedback, model monitor, retraining gate |
+| Remain safe under failure | Availability flags, fusion weight redistribution, governed LLM boundary |
+| Protect data and access | Role policies, token/auth boundaries, redaction, append-only audit |
+
+### Preflight checklist
+
+- [ ] Start the web app and verify `/executive-demo` loads.
+- [ ] Confirm the browser is in demo mode and no credentials are needed.
+- [ ] For live mode, verify `localhost:8026/health` and run `make seed-analyst`.
+- [ ] Keep `/analyst/tx/tx_9001` ready as the marquee fraud case.
+- [ ] Keep `/analyst/models` ready for the governance close.
+- [ ] If live services fail, switch to offline CLI output and deterministic MSW UI.
+
+
 This document is the reliable demonstration path for evaluation, plus the
 prepared deployment path for going live.
 

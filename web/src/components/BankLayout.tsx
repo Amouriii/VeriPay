@@ -10,6 +10,7 @@ const navigation = [
   ['Fraud & Alerts', '/bank/alerts', '!'],
   ['Risk Analytics', '/bank/analytics', '◒'],
   ['Analyst Console', '/analyst', '⚑'],
+  ['Executive Briefing', '/executive-demo', '★'],
 ];
 
 export function BankLayout({ children }: { children: ReactNode }) {
