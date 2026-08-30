@@ -106,15 +106,19 @@ curl -X PATCH -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/js
   https://api.vercel.com/v9/projects/veri-pay
 ```
 
-The committed `vercel.json` (repo root) mirrors the build settings and is
-schema-valid; keep it minimal and valid:
+The committed `vercel.json` (repo root) explicitly installs and builds the
+`web/` package, publishes `web/dist`, and rewrites client-side routes (including
+`/executive-demo`) to the Vite entrypoint. It is schema-valid; keep it minimal
+and valid:
 
 ```json
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vite",
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist"
+  "installCommand": "cd web && npm install",
+  "buildCommand": "cd web && npm run build",
+  "outputDirectory": "web/dist",
+  "rewrites": [{"source": "/(.*)", "destination": "/index.html"}]
 }
 ```
 
@@ -175,4 +179,5 @@ scripts/seed-demo.py            # drives the whole pipeline against localhost
 ```
 
 The dashboard URL demonstrates the analyst console, investigation copilot,
-FI Ops, and Business portals (MSW mocks against the frozen OpenAPI contracts).
+FI Ops, Business portals, and the executive board briefing at
+`/executive-demo` (MSW mocks against the frozen OpenAPI contracts).
