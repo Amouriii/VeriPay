@@ -254,6 +254,8 @@ jobs:
         with:
           failure-threshold: warning
           no-color: true
+          dockerfile: Dockerfile
+          recursive: true
       - name: Build representative services (plain, ML, LLM Dockerfile variants)
         run: docker compose -f infra/compose/services.yml build ingress supervised_model investigation_agent
       - name: Confirm images were produced
