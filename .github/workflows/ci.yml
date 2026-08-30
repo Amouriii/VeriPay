@@ -372,7 +372,7 @@ jobs:
           from pathlib import Path
           cfg = json.loads(Path('vercel.json').read_text())
           assert cfg.get('framework') == 'vite', 'Vercel framework must be vite'
-          assert cfg.get('rootDirectory') == 'web', 'Vercel rootDirectory must be web'
+          assert 'rootDirectory' not in cfg, 'rootDirectory belongs in Vercel project settings, not vercel.json'
           assert cfg.get('outputDirectory') == 'dist', 'Vercel outputDirectory must be dist'
           assert cfg.get('buildCommand') == 'npm run build', 'Vercel buildCommand must run the web build'
           assert cfg.get('rewrites') == [{'source': '/(.*)', 'destination': '/index.html'}], \
