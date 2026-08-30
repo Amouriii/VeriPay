@@ -13,6 +13,7 @@ import {
   FEEDBACK_HISTORY,
   FEEDBACK_STATS,
   getExplain,
+  getNetwork,
   getProfile,
   getScore,
 } from './analystData';
@@ -64,6 +65,14 @@ export const analystHandlers = [
     const profile = getProfile(ccNum);
     if (!profile) return HttpResponse.json({ detail: 'Unknown customer' }, { status: 404 });
     return HttpResponse.json(profile);
+  }),
+
+  // Screen 5b — customer network (graph) context, browsable without an alert.
+  http.get('*/api/customer/:ccNum/network', ({ params }) => {
+    const ccNum = Number(params.ccNum);
+    const network = getNetwork(ccNum);
+    if (!network) return HttpResponse.json({ detail: 'Unknown customer' }, { status: 404 });
+    return HttpResponse.json(network);
   }),
 
   // Screen 6 — feedback submission.

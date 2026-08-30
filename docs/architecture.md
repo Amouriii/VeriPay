@@ -209,6 +209,7 @@ they own. The local host DSNs are:
 | Human Feedback Loop | `services/feedback_loop` | §21 |
 | Model Monitor (drift + gated retraining) | `services/model_monitor` + `ml/drift` | §10, §21 |
 | Analyst Dashboard | `web/` | §20 |
+| Analyst API (composite) | `services/analyst_api` | §20 |
 | Contracts (gRPC) | `proto/veripay/` | all |
 | Shared enums/constants | `libs/veripay_common`, `libs/veripay_ts` | all |
 

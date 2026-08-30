@@ -80,7 +80,7 @@ struct AnalysisResultView: View {
           }
         }
 
-        Text("Simulated analysis • No payment was processed")
+        Text(store.usingLiveRisk ? "Live risk scoring via the VeriPay analyst service • No payment was processed" : "Simulated analysis • No payment was processed")
           .font(.system(size: 11, weight: .medium))
           .foregroundColor(VeriPayTheme.secondaryText)
           .padding(.bottom, 22)

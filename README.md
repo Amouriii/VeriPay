@@ -9,7 +9,7 @@ upstream `PLAN.md` for the authoritative design (sections 4–24).
 VeriPay/
 ├─ proto/veripay/     gRPC + message contracts (shared boundary)
 ├─ libs/              shared code: veripay_common (py), veripay_ts (ts)
-├─ services/          16 FastAPI/gRPC services, one per diagrammed component
+├─ services/          26 FastAPI/gRPC services, one per diagrammed component
 ├─ streaming/         Apache Flink (PyFlink) feature aggregation jobs
 ├─ web/               Vite + React + TS analyst dashboard
 ├─ ml/                XGBoost / Isolation Forest / graph / fusion pipelines
@@ -71,6 +71,7 @@ defaults. Copy a template or export values explicitly:
 | `LLM_PROVIDER` | `deterministic` | investigation agent — `deterministic` or `openai_compatible` (local vLLM) |
 | `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, `LLM_TIMEOUT_SECONDS` | vLLM defaults (`http://localhost:8000/v1`, `EMPTY`, …) | investigation agent (vLLM provider) |
 | `VITE_API_BASE` | `http://localhost:8000` | web dashboard (`web/.env.example`) |
+| `VITE_ANALYST_API_BASE` | *(unset → MSW mocks)* | analyst console — set to the `analyst_api` service (e.g. `http://localhost:8026`) to serve it live |
 
 `.env.example` files exist per service (`services/*/.env.example`) and for the
 web app (`web/.env.example`). Never commit real secrets; `.env` is gitignored.
@@ -194,3 +195,5 @@ land on `main` first. See `docs/contributing.md`.
 | business_portal | 8023 | Expansion §1 Dev5 |
 | corporate_spend | 8024 | Expansion §1 Dev1 |
 | model_monitor | 8025 | §21 (drift + automated retraining) |
+| analyst_api | 8026 | Analyst console: /score, /explain, /customer profile, /feedback, /feedback/stats, /retrain (§20) |
+| seed_analyst | — | One-shot: seeds the analyst console alert queue via `analyst_api` (`docker compose run --rm seed_analyst` to re-seed) |

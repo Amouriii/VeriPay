@@ -8,6 +8,8 @@ final class DemoStore: ObservableObject {
   @Published private(set) var activeAnalysis: FraudAnalysis?
   @Published private(set) var selectedAccount: DemoAccount?
   @Published private(set) var biometricMessage = ""
+  /// True when the last analysis came from the live analyst_api instead of mocks.
+  @Published private(set) var usingLiveRisk = false
 
   var account: DemoAccount { selectedAccount ?? MockBankingService.personalAccount }
   private var activeScenario: DemoScenario?
@@ -32,14 +34,25 @@ final class DemoStore: ObservableObject {
   func signOut() { resetState(route: .welcome) }
 
   func start(_ scenario: DemoScenario) {
-    analysisTask?.cancel(); activeScenario = scenario
+    analysisTask?.cancel()
+    activeScenario = scenario
     pendingTransaction = MockBankingService.transaction(for: scenario, account: account)
-    activeAnalysis = nil; pendingWasRecorded = false
+    activeAnalysis = nil
+    usingLiveRisk = false
+    pendingWasRecorded = false
+    let transaction = pendingTransaction
     withAnimation(.easeInOut(duration: 0.35)) { route = .analyzing }
+
     analysisTask = Task { [weak self] in
-      try? await Task.sleep(nanoseconds: 2_350_000_000)
-      guard !Task.isCancelled, let self, let scenario = self.activeScenario else { return }
-      self.completeAnalysis(scenario)
+      guard let transaction else { return }
+      // Resolve the live analyst score while the analyzing moment is shown.
+      async let fetched: FraudAnalysis? = LiveRiskService.evaluate(
+        scenario: scenario, transaction: transaction
+      )
+      try? await Task.sleep(nanoseconds: 1_800_000_000)
+      let liveAnalysis = await fetched
+      guard !Task.isCancelled, let self, self.activeScenario == scenario else { return }
+      self.completeAnalysis(scenario, liveAnalysis: liveAnalysis)
     }
   }
 
@@ -49,8 +62,9 @@ final class DemoStore: ObservableObject {
   func returnToDashboard() { resetState(route: .dashboard) }
   func resetDemo() { recentTransactions = MockBankingService.recentTransactions(for: account); resetState(route: .dashboard) }
 
-  private func completeAnalysis(_ scenario: DemoScenario) {
-    activeAnalysis = MockBankingService.analysis(for: scenario, account: account)
+  private func completeAnalysis(_ scenario: DemoScenario, liveAnalysis: FraudAnalysis?) {
+    usingLiveRisk = liveAnalysis != nil
+    activeAnalysis = liveAnalysis ?? MockBankingService.analysis(for: scenario, account: account)
     if scenario == .lowRisk { recordPendingTransaction(as: .approved) }
     withAnimation(.spring(response: 0.55, dampingFraction: 0.9)) { route = .analysisResult }
   }
@@ -63,7 +77,8 @@ final class DemoStore: ObservableObject {
 
   private func resetState(route destination: DemoRoute) {
     analysisTask?.cancel(); analysisTask = nil; activeScenario = nil
-    pendingTransaction = nil; activeAnalysis = nil; pendingWasRecorded = false; biometricMessage = ""
+    pendingTransaction = nil; activeAnalysis = nil; pendingWasRecorded = false
+    usingLiveRisk = false; biometricMessage = ""
     withAnimation(.spring(response: 0.5, dampingFraction: 0.9)) { route = destination }
   }
 }

@@ -1,9 +1,10 @@
 // TanStack Query hooks + mutations for the fraud-analyst console.
 // Wire to the Analyst API described in the dashboard UI guide.
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiGet, apiPost } from './client';
+import { analystGet, analystPost } from './client';
 import type {
   AlertItem,
+  CustomerNetwork,
   CustomerProfileResponse,
   ExplainResponse,
   FeedbackInput,
@@ -20,14 +21,14 @@ function scorePayload(txId?: string, ccNum?: number) {
 export function useAlerts() {
   return useQuery({
     queryKey: ['alerts'],
-    queryFn: () => apiGet<AlertItem[]>('/alerts'),
+    queryFn: () => analystGet<AlertItem[]>('/alerts'),
   });
 }
 
 export function useScore(txId: string, enabled = true) {
   return useQuery({
     queryKey: ['score', txId],
-    queryFn: () => apiPost<ScoreResponse>('/score', scorePayload(txId)),
+    queryFn: () => analystPost<ScoreResponse>('/score', scorePayload(txId)),
     enabled,
   });
 }
@@ -35,7 +36,7 @@ export function useScore(txId: string, enabled = true) {
 export function useExplain(txId: string, enabled = true) {
   return useQuery({
     queryKey: ['explain', txId],
-    queryFn: () => apiPost<ExplainResponse>('/explain', scorePayload(txId)),
+    queryFn: () => analystPost<ExplainResponse>('/explain', scorePayload(txId)),
     enabled,
   });
 }
@@ -45,7 +46,18 @@ export function useCustomerProfile(ccNum?: number) {
     queryKey: ['customer-profile', ccNum],
     queryFn: () =>
       ccNum !== undefined
-        ? apiGet<CustomerProfileResponse>(`/customer/${ccNum}/profile`)
+        ? analystGet<CustomerProfileResponse>(`/customer/${ccNum}/profile`)
+        : Promise.reject(new Error('Customer not selected')),
+    enabled: ccNum !== undefined,
+  });
+}
+
+export function useCustomerNetwork(ccNum?: number) {
+  return useQuery({
+    queryKey: ['customer-network', ccNum],
+    queryFn: () =>
+      ccNum !== undefined
+        ? analystGet<CustomerNetwork>(`/customer/${ccNum}/network`)
         : Promise.reject(new Error('Customer not selected')),
     enabled: ccNum !== undefined,
   });
@@ -54,14 +66,14 @@ export function useCustomerProfile(ccNum?: number) {
 export function useFeedbackStats() {
   return useQuery({
     queryKey: ['feedback-stats'],
-    queryFn: () => apiGet<FeedbackStats>('/feedback/stats'),
+    queryFn: () => analystGet<FeedbackStats>('/feedback/stats'),
   });
 }
 
 export function useHealth() {
   return useQuery({
     queryKey: ['health'],
-    queryFn: () => apiGet<HealthResponse>('/health'),
+    queryFn: () => analystGet<HealthResponse>('/health'),
     refetchInterval: 30_000,
   });
 }
@@ -70,7 +82,7 @@ export function useSubmitFeedback() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: FeedbackInput) =>
-      apiPost<{ status: string }>('/feedback', input),
+      analystPost<{ status: string }>('/feedback', input),
     onSuccess: () => {
       // Invalidate stats so the performance page reflects the new verdict.
       void queryClient.invalidateQueries({ queryKey: ['feedback-stats'] });
@@ -81,7 +93,7 @@ export function useSubmitFeedback() {
 export function useRetrain() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => apiPost<RetrainResponse>('/retrain'),
+    mutationFn: () => analystPost<RetrainResponse>('/retrain'),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['health'] });
     },

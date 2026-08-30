@@ -181,6 +181,7 @@ jobs:
           - fi_ops_portal
           - business_portal
           - model_monitor
+          - analyst_api
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

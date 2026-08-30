@@ -24,6 +24,71 @@ export interface XgbContribution {
   shap_value: number;
 }
 
+export interface NetworkEgoNode {
+  id: string;
+  kind: 'customer' | 'merchant';
+  label: string;
+  status: 'self' | 'flagged' | 'review' | 'normal';
+}
+
+export interface NetworkEgoEdge {
+  from: string;
+  to: string;
+  weight: number;
+}
+
+export interface NetworkEgo {
+  nodes: NetworkEgoNode[];
+  edges: NetworkEgoEdge[];
+}
+
+export interface NetworkFeatures {
+  merchant_degree: number;
+  merchant_fan_in: number;
+  shared_counterparty_count: number;
+  co_occurrence_count: number;
+  flagged_neighbor_count: number;
+  flagged_exposure: number;
+  cluster_size: number;
+  cluster_flagged_ratio: number;
+}
+
+export interface CommunityStats {
+  cluster_size: number;
+  flagged_count: number;
+  flagged_ratio: number;
+  distinct_shared_merchants: number;
+  total_volume: number;
+  dominant_pattern:
+    | 'fraud_ring'
+    | 'mixed_cluster'
+    | 'shared_merchant_collapse'
+    | 'normal_cluster'
+    | 'isolated';
+}
+
+export interface CommunityMember {
+  cc_num: number;
+  status: 'self' | 'flagged' | 'normal';
+}
+
+export interface Community {
+  graph: NetworkEgo;
+  stats: CommunityStats;
+  members: CommunityMember[];
+}
+
+/** Network context returned by GET /customer/{cc_num}/network. */
+export interface CustomerNetwork {
+  cc_num: number;
+  network_risk_score: number;
+  available: boolean;
+  findings: string[];
+  features?: NetworkFeatures;
+  ego?: NetworkEgo;
+  community?: Community;
+}
+
 export interface RecentTransaction {
   time: string;
   amount: number;
@@ -40,10 +105,18 @@ export interface ScoreResponse {
   fraud_probability: number; // 0..1
   anomaly_score: number; // 0..1
   verification_action: string;
+  feature_mode?: string; // 'basic' | 'rich'
   features: FeatureRow[];
+  features16?: FeatureRow[];
   anomaly_top_contributors: ContributorShare[];
   xgboost_feature_contributions: XgbContribution[];
   recent_transactions: RecentTransaction[];
+  network_risk_score: number; // 0..1
+  network_available: boolean;
+  network_findings: string[];
+  network_ego?: NetworkEgo;
+  network_features?: NetworkFeatures;
+  network_community?: Community;
 }
 
 export interface CaseReport {
@@ -51,6 +124,8 @@ export interface CaseReport {
   evidence: string[];
   pattern_match: string;
   recommended_action: string;
+  crosschecked?: boolean;
+  hallucination_flagged?: boolean;
 }
 
 export interface ExplainResponse {
