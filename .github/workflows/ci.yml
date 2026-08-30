@@ -352,6 +352,9 @@ jobs:
   vercel-build:
     name: Vercel build (web)
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -360,9 +363,9 @@ jobs:
           cache: npm
           cache-dependency-path: web/package-lock.json
       - name: Install web deps
-        run: npm ci || npm install
-        working-directory: web
+        run: npm ci
       - name: Validate Vercel project configuration
+        working-directory: .
         run: |
           python3 -c "
           import json
@@ -380,7 +383,6 @@ jobs:
           "
       - name: Build from configured root directory
         run: npm run build
-        working-directory: web
 
   # ----------------------------------------------------------- security -----
   secret-scan:
