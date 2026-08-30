@@ -8,6 +8,7 @@ Examples:
     python scripts/executive-demo.py --live
     python scripts/executive-demo.py --offline --json
 """
+
 from __future__ import annotations
 
 import argparse
@@ -34,58 +35,61 @@ OFFLINE_SCENARIOS = [
         "clean_approval",
         "trust",
         "PASS",
-        "Trusted device, known merchant, normal amount and velocity.",
+        ("Trusted device, known merchant, normal amount and velocity."),
     ),
     Scenario(
         "card_testing",
         "trust",
         "BLOCK",
-        "96.8% fraud probability; 6 transactions/hour; 12.4x baseline; shared-fraud merchant.",
+        ("96.8% fraud probability; 6 transactions/hour; 12.4x baseline; shared-fraud merchant."),
     ),
     Scenario(
         "stealth_fraud",
         "trust",
         "REVIEW_STEALTH",
         (
-            "High fraud likelihood with low anomaly signal; route to human review "
-            "and biometric verification."
+            "High fraud likelihood with low anomaly signal; route to human "
+            "review and biometric verification."
         ),
     ),
     Scenario(
         "network_ring",
         "platform",
         "NETWORK RISK",
-        "Graph axis identifies flagged neighbors and a 50% confirmed-fraud community.",
+        ("Graph axis identifies flagged neighbors and a 50% confirmed-fraud community."),
     ),
     Scenario(
         "customer_verification",
         "trust",
         "CUSTOMER SAFE",
-        "Push/biometric verification gives the customer a low-friction recovery path.",
+        ("Push/biometric verification gives the customer a low-friction recovery path."),
     ),
     Scenario(
         "fi_ops_controls",
         "operations",
         "AUDITABLE",
-        "FI Ops covers transactions, disputes, regulatory reporting, and immutable audit history.",
+        (
+            "FI Ops covers transactions, disputes, regulatory reporting, and "
+            "immutable audit history."
+        ),
     ),
     Scenario(
         "business_treasury",
         "operations",
         "CONTROLLED SPEND",
-        "Business policy, merchant limits, VCN controls, webhooks, and dispute transitions.",
+        ("Business policy, merchant limits, VCN controls, webhooks, and dispute transitions."),
     ),
     Scenario(
         "resilience",
         "platform",
         "DEGRADED SAFE",
-        "Unavailable graph/model signals are marked unavailable and fusion redistributes weight.",
+        ("Unavailable graph/model signals are marked unavailable and fusion redistributes weight."),
     ),
     Scenario(
         "feedback_learning",
         "platform",
         "GOVERNED LEARNING",
-        "Analyst labels adjust live scoring and feed monitoring/retraining gates.",
+        ("Analyst labels adjust live scoring and feed monitoring/retraining gates."),
     ),
 ]
 
@@ -122,7 +126,7 @@ def run_live(base: str) -> list[dict[str, Any]]:
             "name": "analyst_api_health",
             "area": "platform",
             "outcome": "ONLINE" if health else "UNAVAILABLE",
-            "evidence": health or "Start analyst_api on port 8026.",
+            "evidence": health or ("Start analyst_api on port 8026."),
         }
     )
     alerts = _get(base, "/alerts")
@@ -130,11 +134,11 @@ def run_live(base: str) -> list[dict[str, Any]]:
         {
             "name": "alert_queue",
             "area": "trust",
-            "outcome": f"{len(alerts)} ALERTS" if isinstance(alerts, list) else "UNAVAILABLE",
+            "outcome": (f"{len(alerts)} ALERTS" if isinstance(alerts, list) else "UNAVAILABLE"),
             "evidence": (
                 alerts[:2]
                 if isinstance(alerts, list)
-                else "Seed the queue with make seed-analyst."
+                else ("Seed the queue with make seed-analyst.")
             ),
         }
     )
@@ -143,8 +147,8 @@ def run_live(base: str) -> list[dict[str, Any]]:
         {
             "name": "card_testing",
             "area": "trust",
-            "outcome": score.get("decision", "UNAVAILABLE") if score else "UNAVAILABLE",
-            "evidence": score or "Seeded transaction tx_9001 not found.",
+            "outcome": (score.get("decision", "UNAVAILABLE") if score else "UNAVAILABLE"),
+            "evidence": score or ("Seeded transaction tx_9001 not found."),
         }
     )
     profile = _get(base, "/customer/4716561796955522/profile")
@@ -152,8 +156,8 @@ def run_live(base: str) -> list[dict[str, Any]]:
         {
             "name": "customer_context",
             "area": "trust",
-            "outcome": "PROFILE READY" if profile else "UNAVAILABLE",
-            "evidence": profile or "Profile unavailable.",
+            "outcome": ("PROFILE READY" if profile else "UNAVAILABLE"),
+            "evidence": profile or ("Profile unavailable."),
         }
     )
     stats = _get(base, "/feedback/stats")
@@ -161,8 +165,8 @@ def run_live(base: str) -> list[dict[str, Any]]:
         {
             "name": "feedback_learning",
             "area": "platform",
-            "outcome": "MEASURED" if stats else "UNAVAILABLE",
-            "evidence": stats or "Feedback stats unavailable.",
+            "outcome": ("MEASURED" if stats else "UNAVAILABLE"),
+            "evidence": stats or ("Feedback stats unavailable."),
         }
     )
     return result
@@ -174,14 +178,14 @@ def main(argv: list[str] | None = None) -> int:
     mode.add_argument(
         "--offline",
         action="store_true",
-        help="Use deterministic fixtures; default mode.",
+        help=("Use deterministic fixtures; default mode."),
     )
     mode.add_argument("--live", action="store_true", help="Call the live Analyst API.")
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
     parser.add_argument(
         "--api",
         default=os.getenv("VERIPAY_ANALYST_API_URL", "http://localhost:8026"),
-        help="Analyst API base URL for --live.",
+        help=("Analyst API base URL for --live."),
     )
     args = parser.parse_args(argv)
     live = args.live
@@ -206,9 +210,7 @@ def main(argv: list[str] | None = None) -> int:
                 evidence = json.dumps(evidence, separators=(",", ":"))
             print(f"[{row['area'].upper():10}] {row['name']:<24} {row['outcome']}")
             print(f"             {evidence[:180]}")
-        coverage = ", ".join(
-            f"{key}={value}" for key, value in payload["coverage"].items()
-        )
+        coverage = ", ".join(f"{key}={value}" for key, value in payload["coverage"].items())
         print("\nCoverage: " + coverage)
         if live and not any(row["outcome"] != "UNAVAILABLE" for row in rows):
             print(
