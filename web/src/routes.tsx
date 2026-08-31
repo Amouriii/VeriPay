@@ -2,6 +2,7 @@
 export const ROUTES = {
   dashboard: '/',
   executiveDemo: '/executive-demo',
+  accountSelection: '/account-selection',
   transaction: '/tx/:id',
   investigation: '/investigation/:id',
   feedback: '/feedback',

@@ -48,6 +48,7 @@ import { CustomerProfile } from './pages/analyst/CustomerProfile';
 import { SystemPerformance } from './pages/analyst/SystemPerformance';
 import { ModelInfo } from './pages/analyst/ModelInfo';
 import { ExecutiveDemo } from './pages/ExecutiveDemo';
+import { AccountSelection } from './pages/AccountSelection';
 
 /* -------------------------------------------------------------------------- */
 /* Customer routes                                                            */
@@ -130,6 +131,7 @@ export function App() {
   return (
     <Routes>
       <Route path="/executive-demo" element={<ExecutiveDemo />} />
+      <Route path="/account-selection" element={<AccountSelection />} />
 
       <Route
         path="/customer/login"
@@ -151,10 +153,7 @@ export function App() {
         element={<AnalystApp />}
       />
 
-      <Route
-        path="/"
-        element={<Navigate to="/login" replace />}
-      />
+      <Route path="/" element={<AccountSelection />} />
 
       <Route
         path="/fi-ops"
@@ -311,7 +310,7 @@ export function App() {
 
       <Route
         path="*"
-        element={<Navigate to="/login" replace />}
+        element={<Navigate to="/" replace />}
       />
     </Routes>
   );
