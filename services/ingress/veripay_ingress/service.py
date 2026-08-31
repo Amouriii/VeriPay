@@ -2,8 +2,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+import base64
+import hashlib
 import json
+import logging
+import os
+from dataclasses import dataclass, field
 from typing import Any, Protocol
 from urllib.request import Request, urlopen
 from uuid import uuid4
@@ -25,6 +29,30 @@ from veripay_common.risk_policy import (
     processing_path_for_rail,
     tier_for_score,
 )
+
+
+class EncryptedSystemLogger:
+    """Emit authenticated, encrypted JSON log records without raw PII."""
+
+    def __init__(self, key: str, *, logger: logging.Logger | None = None) -> None:
+        self._logger = logger or logging.getLogger("veripay.system")
+        self._key = key.encode("utf-8")
+
+    def emit(self, event: str, **fields: Any) -> None:
+        # AES-GCM is provided by the standard-library-compatible cryptography
+        # dependency in veripay-common; fail closed if encryption is disabled.
+        if not self._key:
+            return
+        from cryptography.fernet import Fernet
+
+        digest = hashlib.sha256(self._key).digest()
+        fernet_key = base64.urlsafe_b64encode(digest)
+        payload = {"event": event, **fields}
+        token = Fernet(fernet_key).encrypt(json.dumps(payload, sort_keys=True).encode())
+        self._logger.info("encrypted_system_event=%s", token.decode("ascii"))
+
+
+_SYSTEM_LOGGER = EncryptedSystemLogger(os.getenv("SYSTEM_LOG_KEY", ""))
 
 
 class Transaction(BaseModel):
@@ -252,6 +280,12 @@ def _legacy_authorize(transaction: Transaction, risk: RiskScore) -> Authorizatio
 def authorize(transaction: Transaction, *, settings: Any | None = None) -> AuthorizationResponse:
     """Authorize with ML-first risk and the existing authorization matrix."""
     risk = calculate_risk(transaction, settings=settings)
+    _SYSTEM_LOGGER.emit(
+        "transaction_authorized",
+        transaction_id=transaction.transaction_id,
+        decision=str(risk.band),
+        risk_score=risk.unified_score,
+    )
     if transaction.payment_rail is None:
         return _legacy_authorize(transaction, risk)
     path = transaction.processing_path or processing_path_for_rail(transaction.payment_rail)

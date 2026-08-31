@@ -8,6 +8,7 @@ dependencies = [
     "uvicorn[standard]>=0.30",
     "pydantic>=2.7",
     "veripay-common",
+    "cryptography>=43",
 ]
 
 [project.scripts]

@@ -1,6 +1,7 @@
+import logging
 from typing import Any
 
-from veripay_ingress.service import Transaction, calculate_risk
+from veripay_ingress.service import EncryptedSystemLogger, Transaction, calculate_risk
 
 
 class Settings:
@@ -19,15 +20,40 @@ def _tx() -> Transaction:
     )
 
 
+def test_system_log_is_encrypted_and_does_not_emit_plaintext(caplog: Any) -> None:
+    logger = EncryptedSystemLogger("test-key", logger=logging.getLogger("test-system"))
+    with caplog.at_level(logging.INFO, logger="test-system"):
+        logger.emit("transaction_authorized", transaction_id="tx-secret", risk_score=12)
+    assert "tx-secret" not in caplog.text
+    assert "encrypted_system_event=" in caplog.text
+
+
+def test_system_log_is_disabled_without_key(caplog: Any) -> None:
+    logger = EncryptedSystemLogger("", logger=logging.getLogger("test-system-empty"))
+    with caplog.at_level(logging.INFO, logger="test-system-empty"):
+        logger.emit("transaction_authorized", transaction_id="tx-secret")
+    assert not caplog.records
+
+
 def test_ml_scores_are_used_before_legacy_baseline(monkeypatch: Any) -> None:
     calls: list[str] = []
 
     def post(url: str, path: str, payload: dict[str, Any], timeout: float) -> dict[str, Any]:
         calls.append(url)
         if url == "http://supervised":
-            return {"fraud_probability": 0.9, "model_available": True, "model_name": "supervised", "model_version": "v7"}
+            return {
+                "fraud_probability": 0.9,
+                "model_available": True,
+                "model_name": "supervised",
+                "model_version": "v7",
+            }
         if url == "http://anomaly":
-            return {"anomaly_score": 0.8, "model_available": True, "model_name": "anomaly", "model_version": "v3"}
+            return {
+                "anomaly_score": 0.8,
+                "model_available": True,
+                "model_name": "anomaly",
+                "model_version": "v3",
+            }
         return {"unified_score": 85, "band": "BLOCK", "tier": "HIGH"}
 
     monkeypatch.setattr("veripay_ingress.service._post_json", post)
