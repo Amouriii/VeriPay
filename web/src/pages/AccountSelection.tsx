@@ -27,8 +27,8 @@ export function AccountSelection() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#DCEBFF] via-[#E8E7FF] to-[#DDF5F7] px-5 py-12 text-[#17324D]">
       <section className="relative w-full max-w-4xl">
-        <div className="absolute -right-8 -top-8 hidden sm:block lg:-right-16 lg:-top-12">
-          <WebsiteQRCode url={DEMO_SITE_URL} size={76} />
+        <div className="fixed right-4 top-4 z-10 hidden sm:block lg:right-6 lg:top-6">
+          <WebsiteQRCode url={DEMO_SITE_URL} size={64} />
         </div>
 
         <div className="mb-10 flex justify-center">
