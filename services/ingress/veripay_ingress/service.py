@@ -2,8 +2,14 @@
 
 from __future__ import annotations
 
+import base64
+import hashlib
+import json
+import logging
+import os
 from dataclasses import dataclass, field
-from typing import Protocol
+from typing import Any, Protocol
+from urllib.request import Request, urlopen
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -23,6 +29,30 @@ from veripay_common.risk_policy import (
     processing_path_for_rail,
     tier_for_score,
 )
+
+
+class EncryptedSystemLogger:
+    """Emit authenticated, encrypted JSON log records without raw PII."""
+
+    def __init__(self, key: str, *, logger: logging.Logger | None = None) -> None:
+        self._logger = logger or logging.getLogger("veripay.system")
+        self._key = key.encode("utf-8")
+
+    def emit(self, event: str, **fields: Any) -> None:
+        # AES-GCM is provided by the standard-library-compatible cryptography
+        # dependency in veripay-common; fail closed if encryption is disabled.
+        if not self._key:
+            return
+        from cryptography.fernet import Fernet
+
+        digest = hashlib.sha256(self._key).digest()
+        fernet_key = base64.urlsafe_b64encode(digest)
+        payload = {"event": event, **fields}
+        token = Fernet(fernet_key).encrypt(json.dumps(payload, sort_keys=True).encode())
+        self._logger.info("encrypted_system_event=%s", token.decode("ascii"))
+
+
+_SYSTEM_LOGGER = EncryptedSystemLogger(os.getenv("SYSTEM_LOG_KEY", ""))
 
 
 class Transaction(BaseModel):
@@ -102,8 +132,99 @@ class InMemoryTransactionRepository:
         return self.transactions.get(transaction_id)
 
 
-def calculate_risk(transaction: Transaction) -> RiskScore:
-    """Return a deterministic baseline score pending full ML provider wiring."""
+def _feature_payload(transaction: Transaction) -> dict[str, float]:
+    """Build a conservative feature vector from the ingress contract."""
+    return {
+        "amount_log": min(20.0, transaction.amount_minor / 100.0),
+        "mcc_risk": 0.5,
+        "velocity_5m": 0.0,
+        "device_trust": -1.0,
+        "network_trust": -1.0,
+        "impossible_travel": 0.0,
+        "new_device": 0.0,
+        "hour_of_day": 12.0,
+        "weekend": 0.0,
+        "distance_km": 0.0,
+    }
+
+
+def _post_json(url: str, path: str, payload: dict[str, Any], timeout: float) -> dict[str, Any]:
+    request = Request(
+        f"{url.rstrip('/')}{path}",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    with urlopen(request, timeout=timeout) as response:  # noqa: S310
+        value = json.loads(response.read().decode("utf-8"))
+    if not isinstance(value, dict):
+        raise ValueError("downstream response must be an object")
+    return value
+
+
+def _ml_first_risk(transaction: Transaction, *, settings: Any) -> RiskScore | None:
+    """Try learned scores first; return None to preserve the legacy scheme."""
+    if not (settings.SUPERVISED_URL and settings.ANOMALY_URL and settings.RISK_FUSION_URL):
+        return None
+    features = _feature_payload(transaction)
+    try:
+        supervised = _post_json(
+            settings.SUPERVISED_URL,
+            "/api/v1/score",
+            {"transaction_id": transaction.transaction_id, "features": features},
+            settings.ML_TIMEOUT_SECONDS,
+        )
+        anomaly = _post_json(
+            settings.ANOMALY_URL,
+            "/api/v1/score",
+            {"transaction_id": transaction.transaction_id, "features": features},
+            settings.ML_TIMEOUT_SECONDS,
+        )
+        components = [
+            ComponentScore(
+                component="supervised",
+                score=round(float(supervised.get("fraud_probability", 0.0)) * 100),
+                weight=0.5,
+                available=bool(supervised.get("model_available", False)),
+                reason_code=str(supervised.get("model_name", "unknown")),
+            ),
+            ComponentScore(
+                component="anomaly",
+                score=round(float(anomaly.get("anomaly_score", 0.0)) * 100),
+                weight=0.5,
+                available=bool(anomaly.get("model_available", False)),
+                reason_code=str(anomaly.get("model_name", "unknown")),
+            ),
+        ]
+        fused = _post_json(
+            settings.RISK_FUSION_URL,
+            "/api/v1/risk/fuse",
+            {
+                "transaction_id": transaction.transaction_id,
+                "components": [component.model_dump() for component in components],
+            },
+            settings.ML_TIMEOUT_SECONDS,
+        )
+        score = int(fused["unified_score"])
+        tier = tier_for_score(score)
+        return RiskScore(
+            transaction_id=transaction.transaction_id,
+            unified_score=score,
+            band=band_for_tier(tier),
+            tier=tier,
+            components=components,
+        )
+    except Exception:  # noqa: BLE001 - ML is an optional first layer
+        return None
+
+
+def calculate_risk(transaction: Transaction, *, settings: Any | None = None) -> RiskScore:
+    """Use ML/fusion first, falling back to the deterministic baseline."""
+    if settings is not None:
+        learned = _ml_first_risk(transaction, settings=settings)
+        if learned is not None:
+            return learned
+    """Return the deterministic legacy risk score."""
     score = 0
     reason: str | None = None
     if transaction.amount_minor >= 100_000:
@@ -159,9 +280,15 @@ def _legacy_authorize(transaction: Transaction, risk: RiskScore) -> Authorizatio
     )
 
 
-def authorize(transaction: Transaction) -> AuthorizationResponse:
-    """Authorize with the blueprint matrix for explicit rail-aware requests."""
-    risk = calculate_risk(transaction)
+def authorize(transaction: Transaction, *, settings: Any | None = None) -> AuthorizationResponse:
+    """Authorize with ML-first risk and the existing authorization matrix."""
+    risk = calculate_risk(transaction, settings=settings)
+    _SYSTEM_LOGGER.emit(
+        "transaction_authorized",
+        transaction_id=transaction.transaction_id,
+        decision=str(risk.band),
+        risk_score=risk.unified_score,
+    )
     if transaction.payment_rail is None:
         return _legacy_authorize(transaction, risk)
     path = transaction.processing_path or processing_path_for_rail(transaction.payment_rail)

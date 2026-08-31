@@ -110,6 +110,8 @@ class ScoreResponse(BaseModel):
     raw_fraud_probability: float = Field(ge=0, le=1)
     raw_anomaly_score: float = Field(ge=0, le=1)
     model_available: bool
+    model_versions: dict[str, str] = Field(default_factory=dict)
+    model_fallbacks: list[str] = Field(default_factory=list)
     feature_mode: str = "basic"  # basic | rich
     adjustments: list[Adjustment] = Field(default_factory=list)
     features: list[FeatureRow] = Field(default_factory=list)

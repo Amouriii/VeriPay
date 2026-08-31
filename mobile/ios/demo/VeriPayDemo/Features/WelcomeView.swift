@@ -89,6 +89,9 @@ struct WelcomeView: View {
             .font(.system(size: 11, weight: .medium))
             .foregroundColor(VeriPayTheme.secondaryText)
             .padding(.top, 22)
+
+          WebsiteQRCode(urlString: "https://veripay-services.vercel.app/")
+            .padding(.top, 18)
             .padding(.bottom, 24)
         }
         .padding(.horizontal, 22)

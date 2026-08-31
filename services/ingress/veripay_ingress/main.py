@@ -40,14 +40,14 @@ def create_app(repository: TransactionRepository | None = None) -> FastAPI:
     )
     def submit_transaction(transaction: Transaction) -> AuthorizationResponse:
         transaction_repository.save(transaction)
-        return authorize(transaction)
+        return authorize(transaction, settings=settings)
 
     @app.get("/api/v1/transactions/{transaction_id}/risk", response_model=RiskScore)
     def transaction_risk(transaction_id: str) -> RiskScore:
         transaction = transaction_repository.get(transaction_id)
         if transaction is None:
             raise HTTPException(status_code=404, detail="Transaction not found")
-        return calculate_risk(transaction)
+        return calculate_risk(transaction, settings=settings)
 
     return app
 
