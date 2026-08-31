@@ -2,7 +2,7 @@
 // Wire to the Analyst API described in the dashboard UI guide.
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { analystGet, analystPost } from './client';
-import { ALERTS, getExplain, getScore } from '../mocks/analystData';
+import { ALERTS, FEEDBACK_STATS, getExplain, getScore } from '../mocks/analystData';
 import type {
   AlertItem,
   CustomerNetwork,
@@ -94,7 +94,16 @@ export function useCustomerNetwork(ccNum?: number) {
 export function useFeedbackStats() {
   return useQuery({
     queryKey: ['feedback-stats'],
-    queryFn: () => analystGet<FeedbackStats>('/feedback/stats'),
+    queryFn: async () => {
+      try {
+        return await analystGet<FeedbackStats>('/feedback/stats');
+      } catch (error) {
+        // Keep deployed demos usable when the optional analyst backend is
+        // unavailable by showing the bundled performance fixture.
+        void error;
+        return FEEDBACK_STATS;
+      }
+    },
   });
 }
 
