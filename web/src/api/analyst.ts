@@ -2,7 +2,7 @@
 // Wire to the Analyst API described in the dashboard UI guide.
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { analystGet, analystPost } from './client';
-import { ALERTS } from '../mocks/analystData';
+import { ALERTS, getExplain, getScore } from '../mocks/analystData';
 import type {
   AlertItem,
   CustomerNetwork,
@@ -39,7 +39,16 @@ export function useAlerts() {
 export function useScore(txId: string, enabled = true) {
   return useQuery({
     queryKey: ['score', txId],
-    queryFn: () => analystPost<ScoreResponse>('/score', scorePayload(txId)),
+    queryFn: async () => {
+      try {
+        return await analystPost<ScoreResponse>('/score', scorePayload(txId));
+      } catch (error) {
+        const seeded = ALERTS.find((alert) => alert.transaction_id === txId);
+        const fallback = seeded ? getScore(txId) : undefined;
+        if (fallback) return fallback;
+        throw error;
+      }
+    },
     enabled,
   });
 }
@@ -47,7 +56,15 @@ export function useScore(txId: string, enabled = true) {
 export function useExplain(txId: string, enabled = true) {
   return useQuery({
     queryKey: ['explain', txId],
-    queryFn: () => analystPost<ExplainResponse>('/explain', scorePayload(txId)),
+    queryFn: async () => {
+      try {
+        return await analystPost<ExplainResponse>('/explain', scorePayload(txId));
+      } catch (error) {
+        const fallback = getExplain(txId);
+        if (fallback) return fallback;
+        throw error;
+      }
+    },
     enabled,
   });
 }
