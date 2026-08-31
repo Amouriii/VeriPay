@@ -130,7 +130,9 @@ class AnalystOrchestrator:
         model_fallbacks = [
             name
             for name, payload in (("supervised", supervised), ("anomaly", anomaly))
-            if bool(payload.get("fallback", False)) or not bool(payload.get("model_available", False))
+            if bool(payload.get("fallback", False)) or not bool(
+                payload.get("model_available", False)
+            )
         ]
 
         labels = self.store.feedback_for_customer(customer)
