@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { analystPost } from '../api/client';
+import type { ScoreResponse } from '../types/analyst';
 
 const steps = [
   {
@@ -58,7 +60,23 @@ const toneClasses = {
 
 export function ExecutiveDemo() {
   const [active, setActive] = useState(0);
+  const [testResult, setTestResult] = useState<ScoreResponse | null>(null);
+  const [testError, setTestError] = useState<string | null>(null);
+  const [testRunning, setTestRunning] = useState(false);
   const step = steps[active];
+
+  const runLiveTest = async () => {
+    setTestRunning(true);
+    setTestError(null);
+    try {
+      const result = await analystPost<ScoreResponse>('/score', { transaction_id: 'tx_9001' });
+      setTestResult(result);
+    } catch {
+      setTestError('The live test could not reach the scoring service.');
+    } finally {
+      setTestRunning(false);
+    }
+  };
   const tone = toneClasses[step.tone];
 
   return (
@@ -72,7 +90,25 @@ export function ExecutiveDemo() {
 
       <main className="mx-auto max-w-7xl px-6 py-8 md:py-12">
         <section className="grid gap-8 lg:grid-cols-[0.9fr_1.5fr] lg:items-end">
-          <div><p className="text-xs font-black uppercase tracking-[0.22em] text-[#087f7a]">The board story</p><h2 className="mt-3 max-w-xl text-4xl font-black tracking-tight text-[#201b4b] md:text-5xl">Make risk decisions that earn trust.</h2><p className="mt-5 max-w-xl text-base leading-7 text-slate-600">A concise view of how VeriPay protects customers, scales institutional operations, and turns governed intelligence into measurable outcomes.</p><div className="mt-7 flex flex-wrap gap-3"><Link to="/analyst/tx/tx_9001" className="rounded-lg bg-[#29265f] px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#201b4b]">Start with a live case</Link><a href="#coverage" className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:border-[#43cddd]">See capability coverage</a></div></div>
+          <div><p className="text-xs font-black uppercase tracking-[0.22em] text-[#087f7a]">The board story</p><h2 className="mt-3 max-w-xl text-4xl font-black tracking-tight text-[#201b4b] md:text-5xl">Make risk decisions that earn trust.</h2><p className="mt-5 max-w-xl text-base leading-7 text-slate-600">A concise view of how VeriPay protects customers, scales institutional operations, and turns governed intelligence into measurable outcomes.</p><div className="mt-7 flex flex-wrap gap-3">
+              <button type="button" onClick={runLiveTest} disabled={testRunning} className="rounded-lg bg-[#087f7a] px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#06645f] disabled:cursor-wait disabled:opacity-60">
+                {testRunning ? 'Running live test…' : '▶ Run live test'}
+              </button>
+              <Link to="/analyst/tx/tx_9001" className="rounded-lg bg-[#29265f] px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-[#201b4b]">Open live case</Link>
+              <a href="#coverage" className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:border-[#43cddd]">See capability coverage</a>
+            </div>
+            {(testResult || testError) && (
+              <div className={`mt-5 rounded-xl border p-4 ${testError ? 'border-red-200 bg-red-50' : 'border-teal-200 bg-teal-50'}`} aria-live="polite">
+                {testError ? <p className="text-sm font-semibold text-red-700">{testError}</p> : testResult && (
+                  <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                    <div><p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Live decision</p><p className="mt-1 text-lg font-black text-red-700">{testResult.decision}</p></div>
+                    <div><p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Fraud probability</p><p className="mt-1 text-lg font-black text-[#201b4b]">{(testResult.fraud_probability * 100).toFixed(1)}%</p></div>
+                    <div><p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Anomaly</p><p className="mt-1 text-lg font-black text-[#201b4b]">{(testResult.anomaly_score * 100).toFixed(1)}%</p></div>
+                    <div className="min-w-[220px] flex-1"><p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Action</p><p className="mt-1 text-sm font-bold text-slate-700">{testResult.verification_action}</p></div>
+                  </div>
+                )}
+              </div>
+            )}</div>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-4">{[['$2.4B', 'protected volume'], ['99.97%', 'decision uptime'], ['33%', 'fewer false positives'], ['<80ms', 'target latency']].map(([value, label]) => <div key={label} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"><p className="text-2xl font-black text-[#201b4b]">{value}</p><p className="mt-1 text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p></div>)}</div>
         </section>
 
