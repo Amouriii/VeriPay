@@ -3,35 +3,60 @@ import CoreImage.CIFilterBuiltins
 import SwiftUI
 import UIKit
 
-/// A QR code that opens a URL when scanned by a camera.
+/// A QR code that opens a URL when scanned by a camera, or tapped.
 struct WebsiteQRCode: View {
   let urlString: String
+  var compact = false
 
   var body: some View {
     Button(action: openURL) {
-      VStack(spacing: 12) {
-        QRCodeImage(text: urlString)
-          .frame(width: 128, height: 128)
-          .padding(12)
-          .background(VeriPayTheme.polarWhite)
-          .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-          .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 5)
-
-        Text(urlString.replacingOccurrences(of: "https://", with: ""))
-          .font(.system(size: 12, weight: .medium, design: .rounded))
-          .foregroundColor(VeriPayTheme.secondaryText)
-          .lineLimit(1)
-      }
-      .overlay(alignment: .topTrailing) {
-        Image(systemName: "arrow.up.right.square")
-          .font(.system(size: 13, weight: .bold))
-          .foregroundColor(VeriPayTheme.indigo)
-          .padding(12)
+      if compact {
+        compactContent
+      } else {
+        fullContent
       }
     }
     .buttonStyle(ScaleButtonStyle())
     .accessibilityElement(children: .combine)
     .accessibilityLabel("Open \(urlString) in Safari")
+  }
+
+  private var fullContent: some View {
+    VStack(spacing: 12) {
+      QRCodeImage(text: urlString)
+        .frame(width: 128, height: 128)
+        .padding(12)
+        .background(VeriPayTheme.polarWhite)
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 5)
+
+      Text(urlString.replacingOccurrences(of: "https://", with: ""))
+        .font(.system(size: 12, weight: .medium, design: .rounded))
+        .foregroundColor(VeriPayTheme.secondaryText)
+        .lineLimit(1)
+    }
+    .overlay(alignment: .topTrailing) {
+      Image(systemName: "arrow.up.right.square")
+        .font(.system(size: 13, weight: .bold))
+        .foregroundColor(VeriPayTheme.indigo)
+        .padding(12)
+    }
+  }
+
+  private var compactContent: some View {
+    QRCodeImage(text: urlString)
+      .frame(width: 84, height: 84)
+      .padding(8)
+      .background(VeriPayTheme.polarWhite)
+      .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+      .shadow(color: Color.black.opacity(0.08), radius: 10, x: 0, y: 4)
+      .overlay(alignment: .topTrailing) {
+        Image(systemName: "arrow.up.right.square")
+          .font(.system(size: 9, weight: .bold))
+          .foregroundColor(VeriPayTheme.indigo)
+          .padding(5)
+          .background(VeriPayTheme.surface.opacity(0.7))
+      }
   }
 
   private func openURL() {
