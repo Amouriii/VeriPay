@@ -27,11 +27,10 @@ export function useAlerts() {
         return await analystGet<AlertItem[]>('/alerts');
       } catch (error) {
         // Keep the demo queue populated when the optional analyst backend
-        // is unavailable; use the same seeded alerts as local MSW.
-        if (import.meta.env.DEV || !import.meta.env.VITE_ANALYST_API_BASE) {
-          return ALERTS;
-        }
-        throw error;
+        // is unavailable. This also keeps deployed executive demos usable
+        // when the backend URL is configured but not reachable.
+        void error;
+        return ALERTS;
       }
     },
   });
