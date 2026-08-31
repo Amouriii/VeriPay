@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { analystPost } from '../api/client';
 import type { ScoreResponse } from '../types/analyst';
+import { getScore } from '../mocks/analystData';
 
 const steps = [
   {
@@ -72,6 +73,13 @@ export function ExecutiveDemo() {
       const result = await analystPost<ScoreResponse>('/score', { transaction_id: 'tx_9001' });
       setTestResult(result);
     } catch {
+      // Keep the executive demo usable when no backend is configured. The
+      // seeded case is the same contract served by MSW in local development.
+      const seededResult = getScore('tx_9001');
+      if (seededResult) {
+        setTestResult(seededResult);
+        return;
+      }
       setTestError('The live test could not reach the scoring service.');
     } finally {
       setTestRunning(false);
