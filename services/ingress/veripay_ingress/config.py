@@ -19,5 +19,13 @@ class Settings:
         "POSTGRES_DSN", "postgresql://veripay:veripay@localhost:5432/veripay"
     )
 
+    # Optional ML-first downstream endpoints. Empty values keep the legacy
+    # ingress path active when the services are not deployed.
+    SUPERVISED_URL: str = os.getenv("VERIPAY_SUPERVISED_URL", "")
+    ANOMALY_URL: str = os.getenv("VERIPAY_ANOMALY_URL", "")
+    RISK_FUSION_URL: str = os.getenv("VERIPAY_RISK_FUSION_URL", "")
+    DECISION_URL: str = os.getenv("VERIPAY_DECISION_URL", "")
+    ML_TIMEOUT_SECONDS: float = float(os.getenv("ML_TIMEOUT_SECONDS", "1.5"))
+
 
 settings = Settings()

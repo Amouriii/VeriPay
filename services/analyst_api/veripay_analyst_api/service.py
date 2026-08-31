@@ -122,6 +122,16 @@ class AnalystOrchestrator:
         sup_available = bool(supervised.get("model_available", True))
         anom_available = bool(anomaly.get("model_available", True))
         model_available = sup_available and anom_available
+        model_versions = {
+            name: str(payload.get("model_version", "unknown"))
+            for name, payload in (("supervised", supervised), ("anomaly", anomaly))
+            if payload.get("model_available", False)
+        }
+        model_fallbacks = [
+            name
+            for name, payload in (("supervised", supervised), ("anomaly", anomaly))
+            if bool(payload.get("fallback", False)) or not bool(payload.get("model_available", False))
+        ]
 
         labels = self.store.feedback_for_customer(customer)
         fb = adjustments.feedback_adjustment(
@@ -257,6 +267,8 @@ class AnalystOrchestrator:
             raw_fraud_probability=round(raw_fraud, 4),
             raw_anomaly_score=round(raw_anomaly, 4),
             model_available=model_available,
+            model_versions=model_versions,
+            model_fallbacks=model_fallbacks,
             feature_mode=feature_mode,
             adjustments=adjustments_list,
             features=feature_rows,
@@ -581,7 +593,11 @@ class AnalystOrchestrator:
         return HealthResponse(
             status="ok",
             models_loaded=models_loaded,
-            model_versions={},
+            model_versions={
+                name: str(info.get("model_version", "unknown"))
+                for name, info in upstream.items()
+                if info.get("model_version") is not None
+            },
             upstream={name: info.get("status", "unknown") for name, info in upstream.items()},
         )
 
