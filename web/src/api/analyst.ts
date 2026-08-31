@@ -3,6 +3,19 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { analystGet, analystPost } from './client';
 import { ALERTS, FEEDBACK_STATS, getExplain, getScore } from '../mocks/analystData';
+
+const DEMO_HEALTH: HealthResponse = {
+  status: 'demo',
+  models_loaded: ['ECOD (unsupervised)', 'XGBoost (supervised)', 'Transformer (sequence)'],
+  model_versions: { ecod: 'v12', xgboost: 'v38', transformer: 'v5' },
+};
+
+const DEMO_RETRAIN: RetrainResponse = {
+  status: 'completed',
+  message: 'Retraining simulated using the seeded analyst feedback.',
+  new_version: 'v39',
+  metrics: { roc_auc: 0.931, pr_auc: 0.543, precision: 0.52, recall: 0.48, false_positive_rate: 0.323 },
+};
 import type {
   AlertItem,
   CustomerNetwork,
@@ -110,7 +123,14 @@ export function useFeedbackStats() {
 export function useHealth() {
   return useQuery({
     queryKey: ['health'],
-    queryFn: () => analystGet<HealthResponse>('/health'),
+    queryFn: async () => {
+      try {
+        return await analystGet<HealthResponse>('/health');
+      } catch (error) {
+        void error;
+        return DEMO_HEALTH;
+      }
+    },
     refetchInterval: 30_000,
   });
 }
@@ -130,7 +150,14 @@ export function useSubmitFeedback() {
 export function useRetrain() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => analystPost<RetrainResponse>('/retrain'),
+    mutationFn: async () => {
+      try {
+        return await analystPost<RetrainResponse>('/retrain');
+      } catch (error) {
+        void error;
+        return DEMO_RETRAIN;
+      }
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['health'] });
     },
