@@ -2,6 +2,7 @@
 // Wire to the Analyst API described in the dashboard UI guide.
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { analystGet, analystPost } from './client';
+import { ALERTS } from '../mocks/analystData';
 import type {
   AlertItem,
   CustomerNetwork,
@@ -21,7 +22,18 @@ function scorePayload(txId?: string, ccNum?: number) {
 export function useAlerts() {
   return useQuery({
     queryKey: ['alerts'],
-    queryFn: () => analystGet<AlertItem[]>('/alerts'),
+    queryFn: async () => {
+      try {
+        return await analystGet<AlertItem[]>('/alerts');
+      } catch (error) {
+        // Keep the demo queue populated when the optional analyst backend
+        // is unavailable; use the same seeded alerts as local MSW.
+        if (import.meta.env.DEV || !import.meta.env.VITE_ANALYST_API_BASE) {
+          return ALERTS;
+        }
+        throw error;
+      }
+    },
   });
 }
 
