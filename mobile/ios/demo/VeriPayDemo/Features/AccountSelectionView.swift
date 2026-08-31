@@ -6,16 +6,13 @@ struct AccountSelectionView: View {
   var body: some View {
     VStack(spacing: 24) {
       DemoTopBar(title: "Choose demo account", onBack: { store.route = .welcome })
-      HStack(alignment: .top, spacing: 16) {
-        VStack(alignment: .leading, spacing: 8) {
-          Text("Select an account")
-            .font(.system(size: 30, weight: .bold, design: .rounded))
-            .foregroundColor(VeriPayTheme.primaryText)
-          Text("Test customer and business verification flows with fictional data.")
-            .foregroundColor(VeriPayTheme.secondaryText)
-        }
-        Spacer()
-        WebsiteQRCode(urlString: "https://veripay-services.vercel.app/", compact: true)
+      VStack(spacing: 8) {
+        Text("Select an account")
+          .font(.system(size: 30, weight: .bold, design: .rounded))
+          .foregroundColor(VeriPayTheme.primaryText)
+        Text("Test customer and business verification flows with fictional data.")
+          .multilineTextAlignment(.center)
+          .foregroundColor(VeriPayTheme.secondaryText)
       }
       ForEach(DemoAccountType.allCases) { type in
         Button { store.chooseAccount(type) } label: {
@@ -34,7 +31,6 @@ struct AccountSelectionView: View {
       }
       Spacer()
     }
-    .padding(20)
-    .background(VeriPayTheme.background.ignoresSafeArea())
+    .padding(20).background(VeriPayTheme.background.ignoresSafeArea())
   }
 }

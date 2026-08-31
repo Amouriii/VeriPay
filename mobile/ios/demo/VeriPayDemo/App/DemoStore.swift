@@ -15,6 +15,8 @@ final class DemoStore: ObservableObject {
   private var activeScenario: DemoScenario?
   private var analysisTask: Task<Void, Never>?
   private var pendingWasRecorded = false
+  /// True when the biometric prompt is a high-risk review instead of a sign-in.
+  private var reviewing = false
 
   func chooseAccount(_ type: DemoAccountType) {
     selectedAccount = type == .personal ? MockBankingService.personalAccount : MockBankingService.businessAccount
@@ -24,9 +26,11 @@ final class DemoStore: ObservableObject {
 
   func authenticateBiometric() {
     biometricMessage = "Biometric match confirmed for demo testing."
+    let continueReview = reviewing
+    reviewing = false
     withAnimation(.spring(response: 0.5, dampingFraction: 0.86)) {
       recentTransactions = MockBankingService.recentTransactions(for: account)
-      route = .dashboard
+      route = continueReview ? .verification : .dashboard
     }
   }
 
@@ -56,7 +60,7 @@ final class DemoStore: ObservableObject {
     }
   }
 
-  func reviewTransaction() { route = .biometric }
+  func reviewTransaction() { reviewing = true; route = .biometric }
   func approveTransaction() { recordPendingTransaction(as: .approved); route = .approved }
   func denyTransaction() { recordPendingTransaction(as: .blocked); route = .blocked }
   func returnToDashboard() { resetState(route: .dashboard) }
@@ -78,6 +82,7 @@ final class DemoStore: ObservableObject {
   private func resetState(route destination: DemoRoute) {
     analysisTask?.cancel(); analysisTask = nil; activeScenario = nil
     pendingTransaction = nil; activeAnalysis = nil; pendingWasRecorded = false
+    reviewing = false
     usingLiveRisk = false; biometricMessage = ""
     withAnimation(.spring(response: 0.5, dampingFraction: 0.9)) { route = destination }
   }

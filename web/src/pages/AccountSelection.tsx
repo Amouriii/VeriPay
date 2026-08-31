@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { VeriPayMark } from '../components/VeriPayMark';
+import { WebsiteQRCode, DEMO_SITE_URL } from '../components/WebsiteQRCode';
 
 const accountTypes = [
   {
@@ -25,7 +26,11 @@ const accountTypes = [
 export function AccountSelection() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#DCEBFF] via-[#E8E7FF] to-[#DDF5F7] px-5 py-12 text-[#17324D]">
-      <section className="w-full max-w-4xl">
+      <section className="relative w-full max-w-4xl">
+        <div className="absolute -right-8 -top-8 hidden sm:block lg:-right-16 lg:-top-12">
+          <WebsiteQRCode url={DEMO_SITE_URL} size={76} />
+        </div>
+
         <div className="mb-10 flex justify-center">
           <VeriPayMark />
         </div>
@@ -87,9 +92,13 @@ export function AccountSelection() {
           </p>
         </div>
 
-        <p className="mt-7 text-center text-xs text-[#536B8D]">
+        <p className="mt-10 text-center text-xs text-[#536B8D]">
           Need help choosing? Contact your bank or institution administrator.
         </p>
+
+        <div className="mt-9 flex justify-center sm:hidden">
+          <WebsiteQRCode url={DEMO_SITE_URL} />
+        </div>
       </section>
     </main>
   );
