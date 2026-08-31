@@ -181,25 +181,28 @@ def _ml_first_risk(transaction: Transaction, *, settings: Any) -> RiskScore | No
             settings.ML_TIMEOUT_SECONDS,
         )
         components = [
-            {
-                "component": "supervised",
-                "score": round(float(supervised.get("fraud_probability", 0.0)) * 100),
-                "weight": 0.5,
-                "available": bool(supervised.get("model_available", False)),
-                "reason_code": str(supervised.get("model_name", "unknown")),
-            },
-            {
-                "component": "anomaly",
-                "score": round(float(anomaly.get("anomaly_score", 0.0)) * 100),
-                "weight": 0.5,
-                "available": bool(anomaly.get("model_available", False)),
-                "reason_code": str(anomaly.get("model_name", "unknown")),
-            },
+            ComponentScore(
+                component="supervised",
+                score=round(float(supervised.get("fraud_probability", 0.0)) * 100),
+                weight=0.5,
+                available=bool(supervised.get("model_available", False)),
+                reason_code=str(supervised.get("model_name", "unknown")),
+            ),
+            ComponentScore(
+                component="anomaly",
+                score=round(float(anomaly.get("anomaly_score", 0.0)) * 100),
+                weight=0.5,
+                available=bool(anomaly.get("model_available", False)),
+                reason_code=str(anomaly.get("model_name", "unknown")),
+            ),
         ]
         fused = _post_json(
             settings.RISK_FUSION_URL,
             "/api/v1/risk/fuse",
-            {"transaction_id": transaction.transaction_id, "components": components},
+            {
+                "transaction_id": transaction.transaction_id,
+                "components": [component.model_dump() for component in components],
+            },
             settings.ML_TIMEOUT_SECONDS,
         )
         score = int(fused["unified_score"])
@@ -209,7 +212,7 @@ def _ml_first_risk(transaction: Transaction, *, settings: Any) -> RiskScore | No
             unified_score=score,
             band=band_for_tier(tier),
             tier=tier,
-            components=[ComponentScore(**component) for component in components],
+            components=components,
         )
     except Exception:  # noqa: BLE001 - ML is an optional first layer
         return None
