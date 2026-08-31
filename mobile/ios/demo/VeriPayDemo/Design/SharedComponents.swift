@@ -1,4 +1,75 @@
+import CoreImage
+import CoreImage.CIFilterBuiltins
 import SwiftUI
+import UIKit
+
+/// A QR code that opens a URL when scanned by a camera.
+struct WebsiteQRCode: View {
+  let urlString: String
+
+  var body: some View {
+    Button(action: openURL) {
+      VStack(spacing: 12) {
+        QRCodeImage(text: urlString)
+          .frame(width: 128, height: 128)
+          .padding(12)
+          .background(VeriPayTheme.polarWhite)
+          .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+          .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 5)
+
+        Text(urlString.replacingOccurrences(of: "https://", with: ""))
+          .font(.system(size: 12, weight: .medium, design: .rounded))
+          .foregroundColor(VeriPayTheme.secondaryText)
+          .lineLimit(1)
+      }
+      .overlay(alignment: .topTrailing) {
+        Image(systemName: "arrow.up.right.square")
+          .font(.system(size: 13, weight: .bold))
+          .foregroundColor(VeriPayTheme.indigo)
+          .padding(12)
+      }
+    }
+    .buttonStyle(ScaleButtonStyle())
+    .accessibilityElement(children: .combine)
+    .accessibilityLabel("Open \(urlString) in Safari")
+  }
+
+  private func openURL() {
+    guard let url = URL(string: urlString) else { return }
+    UIApplication.shared.open(url)
+  }
+}
+
+private struct QRCodeImage: View {
+  let text: String
+
+  var body: some View {
+    if let image = generateQRCode(from: text) {
+      Image(uiImage: image)
+        .resizable()
+        .interpolation(.none)
+        .scaledToFit()
+    } else {
+      Image(systemName: "qrcode")
+        .font(.system(size: 60))
+        .foregroundColor(VeriPayTheme.primaryText)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+  }
+
+  private func generateQRCode(from string: String) -> UIImage? {
+    let context = CIContext()
+    let filter = CIFilter.qrCodeGenerator()
+    filter.message = Data(string.utf8)
+    filter.correctionLevel = "M"
+
+    guard let output = filter.outputImage else { return nil }
+    // Scale the small QR output up to a sharp, scan-friendly size.
+    let scaled = output.transformed(by: CGAffineTransform(scaleX: 10, y: 10))
+    guard let cgImage = context.createCGImage(scaled, from: scaled.extent) else { return nil }
+    return UIImage(cgImage: cgImage)
+  }
+}
 
 struct BrandMark: View {
   var compact = false
